@@ -254,6 +254,7 @@ $result = mysqli_query($conn, $query);
                     <select name="keterangan" class="form-control" required>
                         <option value="Baru">Baru</option>
                         <option value="Penggantian">Penggantian</option>
+                        <option value="Penambahan Nama">Penambahan Nama</option>
                     </select>
                 </div>
 

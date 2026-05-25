@@ -80,8 +80,8 @@ if (isset($_POST['login'])) {
         .login-header { background-color: var(--imigrasi-dark); padding: 40px 30px; text-align: center; position: relative; }
         .login-header::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--imigrasi-gold), #D48806); }
 
-        .logo-box { width: 64px; height: 64px; background: linear-gradient(135deg, var(--imigrasi-gold), #D48806); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--imigrasi-dark); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.8rem; margin: 0 auto 16px auto; box-shadow: 0 4px 16px rgba(245, 166, 35, 0.3); }
-
+        .logo-box { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .logo-box img { width: 100%; height: 100%; object-fit: contain; }
         .brand-main { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; color: #FFFFFF; letter-spacing: 0.5px; }
         .brand-sub { display: block; font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; font-weight: 600; }
 
@@ -105,7 +105,9 @@ if (isset($_POST['login'])) {
 
     <div class="login-wrapper">
         <div class="login-header">
-            <div class="logo-box">IM</div>
+            <div class="logo-box">
+                <img src="asset/img/logo.png" alt="Logo Imigrasi">
+            </div>
             <h1 class="brand-main">Sistem Arsip TIKKIM</h1>
             <span class="brand-sub">Imigrasi Kelas II TPI Sampit</span>
         </div>
