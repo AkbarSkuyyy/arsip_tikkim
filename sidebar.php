@@ -64,6 +64,11 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 </a>
             </li>
             <li>
+                <a href="import_arsip.php" class="nav-item <?php echo ($current_page == 'import_arsip.php') ? 'active' : ''; ?>">
+                    <span class="icon">📥</span> Import Arsip Excel
+                </a>
+            </li>
+            <li>
                 <a href="laporan.php" class="nav-item <?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
                     <span class="icon">📈</span> Laporan Bulanan
                 </a>
