@@ -73,6 +73,11 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                     <span class="icon">📈</span> Laporan Bulanan
                 </a>
             </li>
+            <li>
+                <a href="pemusnahan_arsip.php" class="nav-item <?php echo ($current_page == 'pemusnahan_arsip.php') ? 'active' : ''; ?>">
+                    <span class="icon">🗑️</span> Pemusnahan Arsip
+                </a>
+            </li>
             
             <?php if ($is_admin): ?>
             <li style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
