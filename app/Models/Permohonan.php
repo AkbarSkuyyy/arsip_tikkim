@@ -196,22 +196,36 @@ class Permohonan
     }
 
     /**
+     * Kapasitas rak per loker (fisik: roll o'pack/mobile compact shelving).
+     * Loker 1-8 = unit besar, 5 rak (A-E), tiap rak muat 200 kotak.
+     * Loker 9-11 = unit "3 setir" (3 baris geser terpisah, 1 loker = 1
+     * baris/setir), 4 rak (A-D), tiap rak muat 100 kotak.
+     * Loker lain (di luar daftar ini, mis. loker baru) default sama seperti
+     * unit besar (5 rak, 200 kotak/rak).
+     *
+     * Return: [rak_per_loker, kotak_per_rak]
+     */
+    private static function kapasitasLokerNomor(string $nomorLoker): array
+    {
+        $nomor = (int)$nomorLoker;
+        if ($nomor >= 9 && $nomor <= 11) return [4, 100]; // unit 3 setir: Loker 9, 10, 11
+        return [5, 200]; // unit besar: Loker 1-8 (dan default loker baru)
+    }
+
+    /**
      * Auto-assign lokasi fisik (Loker -> Rak -> Kotak) untuk data BARU saja.
-     * Aturan kapasitas: 8 rak per loker (A-H), 100 kotak per rak (1-100).
-     * Urutan pengisian sekuensial: isi Kotak 1..100 di Rak A dulu, baru
-     * pindah ke Rak B, dst; kalau Rak H penuh baru pindah ke Loker berikutnya
-     * (urut nomor loker aktif). Data lama (loker_id=0) TIDAK disentuh/diubah,
-     * hanya dipakai untuk menghitung slot mana yang sudah terisi.
+     * Kapasitas per loker mengikuti unit fisik (lihat kapasitasLokerNomor()).
+     * Urutan pengisian sekuensial: isi Kotak 1..N di Rak A dulu, baru pindah
+     * ke Rak B, dst; kalau rak terakhir loker itu penuh baru pindah ke Loker
+     * berikutnya (urut nomor loker aktif). Data lama (loker_id=0) TIDAK
+     * disentuh/diubah, hanya dipakai untuk menghitung slot mana yang sudah
+     * terisi.
      *
      * Return: ['loker_id' => int, 'rak' => string, 'kotak' => string] atau
      * null jika semua loker aktif penuh (kapasitas habis).
      */
     public static function nextLokasiOtomatis(): ?array
     {
-        $rakPerLoker = 8;   // A..H
-        $kotakPerRak = 100; // 1..100
-        $hurufRak = range('A', chr(ord('A') + $rakPerLoker - 1));
-
         $lokerAktif = MasterLoker::allActive();
         if (empty($lokerAktif)) return null;
 
@@ -224,6 +238,8 @@ class Permohonan
 
         foreach ($lokerAktif as $loker) {
             $lokerId = (int)$loker['id'];
+            [$rakPerLoker, $kotakPerRak] = self::kapasitasLokerNomor((string)$loker['nomor']);
+            $hurufRak = range('A', chr(ord('A') + $rakPerLoker - 1));
             foreach ($hurufRak as $rak) {
                 for ($kotak = 1; $kotak <= $kotakPerRak; $kotak++) {
                     $key = $lokerId . '|' . $rak . '|' . $kotak;
