@@ -14,8 +14,8 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
 
 <style>
     /* CSS Sidebar */
-    .sidebar { width: 280px; background-color: #0A2540; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.08); z-index: 10; }
-    .sidebar-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .sidebar { width: 280px; background-color: #0A2540; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.08); z-index: 10; overflow: hidden; }
+    .sidebar-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
     
     /* Logo Styling */
     .logo-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
@@ -25,7 +25,12 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .brand-main { font-size: 1.15rem; font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif; }
     .brand-sub { font-size: 0.75rem; color: #94A3B8; text-transform: uppercase; margin-top: 3px; font-weight: 600; }
     
-    .sidebar-nav { flex: 1; padding: 24px 16px; }
+    .sidebar-nav { flex: 1; padding: 24px 16px; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(245,166,35,0.25) transparent; }
+    .sidebar-nav::-webkit-scrollbar { width: 6px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.2); border-radius: 10px; transition: background 0.3s ease; }
+    .sidebar-nav:hover::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.45); }
+    .sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.65); }
     .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
     .nav-item:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
@@ -33,7 +38,7 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
     .nav-subitem .icon svg { width: 14px; height: 14px; }
     
-    .sidebar-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .user-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
     .btn-logout { color: #EF4444; background: rgba(239, 68, 68, 0.1); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; }
     .btn-logout:hover { background: #EF4444; color: white; }
