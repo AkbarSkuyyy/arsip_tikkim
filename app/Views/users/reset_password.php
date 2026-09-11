@@ -29,7 +29,7 @@
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../layouts/sidebar.php'; ?>
+    <?php include __DIR__ . '/../layouts/nav.php'; ?>
     <main class="main-content">
         <div class="container">
             <div class="card">

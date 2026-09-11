@@ -7,7 +7,7 @@ class AuthController
     public function login(): void
     {
         if (Auth::check()) {
-            header("Location: dashboard.php");
+            header("Location: " . (Auth::isAdmin() ? 'dashboard_super.php' : 'dashboard.php'));
             exit;
         }
 
@@ -47,7 +47,8 @@ class AuthController
 
                     catatLog(Session::get('user_nama'), "User berhasil login ke sistem.");
 
-                    header("Location: dashboard.php");
+                    $target = ($row['role'] === 'admin') ? 'dashboard_super.php' : 'dashboard.php';
+                    header("Location: " . $target);
                     exit;
                 } elseif ($row) {
                     $error = "Password yang Anda masukkan salah!";

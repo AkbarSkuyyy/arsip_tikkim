@@ -41,7 +41,7 @@
     </style>
 </head>
 <body>
-    <?php include __DIR__ . '/../layouts/sidebar.php'; ?>
+    <?php include __DIR__ . '/../layouts/nav.php'; ?>
     <main class="main-content">
         <header class="top-header">
             <h1 class="page-title">Pengaturan Sistem</h1>

@@ -7,6 +7,7 @@ class DashboardSuperController
     public function index(): void
     {
         Auth::requireAdmin();
+        Session::set('ui_mode', 'super');
 
         $total_data  = Permohonan::count();
         $total_hari_ini  = Permohonan::countToday();

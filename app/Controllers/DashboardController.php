@@ -7,6 +7,7 @@ class DashboardController
     public function index(): void
     {
         Auth::requireLogin();
+        Session::set('ui_mode', 'staff');
 
         $total_data = Permohonan::count();
         $total_baru = Permohonan::countByKeteranganLike('Baru');
