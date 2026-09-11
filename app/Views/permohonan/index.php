@@ -89,7 +89,7 @@
 </head>
 <body>
     <div class="main-wrapper">
-        <?php include 'sidebar.php'; ?>
+        <?php include __DIR__ . '/../layouts/sidebar.php'; ?>
         <div class="content">
             <header class="top-header">
                 <h1 class="page-title">Kelola Arsip Permohonan</h1>

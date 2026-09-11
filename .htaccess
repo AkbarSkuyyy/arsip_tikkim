@@ -1,0 +1,19 @@
+# Arsip TIKKIM — routing & pengamanan direktori
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Berhenti di sini untuk file/direktori yang benar-benar ada
+    # (index.php, asset/*, app/*, dll.) — jangan ditulis ulang.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # /dashboard.php -> index.php?page=dashboard  (kompatibilitas link lama)
+    RewriteRule ^([a-z_]+)\.php$ index.php?page=$1 [L,QSA]
+
+    # /dashboard      -> index.php?page=dashboard
+    RewriteRule ^([a-z_]+)/?$ index.php?page=$1 [L,QSA]
+</IfModule>

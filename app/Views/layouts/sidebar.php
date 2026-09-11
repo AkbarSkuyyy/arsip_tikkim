@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$current_page = basename($_SERVER['SCRIPT_NAME']);
 $user_nama = isset($_SESSION['user_nama']) ? $_SESSION['user_nama'] : 'User';
 $user_jabatan = isset($_SESSION['user_jabatan']) ? $_SESSION['user_jabatan'] : 'Staff';
 $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'U';
@@ -54,28 +53,28 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     <nav class="sidebar-nav">
         <ul class="nav-menu">
             <li>
-                <a href="dashboard.php" class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+                <a href="dashboard.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'dashboard.php') ? 'active' : ''; ?>">
                     <?= icon('dashboard') ?> Dashboard
                 </a>
             </li>
             <li>
-                <a href="data_permohonan.php" class="nav-item <?php echo ($current_page == 'data_permohonan.php') ? 'active' : ''; ?>">
+                <a href="data_permohonan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php') ? 'active' : ''; ?>">
                     <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
             <li>
-                <a href="import_arsip.php" class="nav-item <?php echo ($current_page == 'import_arsip.php') ? 'active' : ''; ?>">
+                <a href="import_arsip.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : ''; ?>">
                     <?= icon('import') ?> Import Arsip Excel
                 </a>
             </li>
             <li>
-                <a href="laporan.php" class="nav-item <?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
+                <a href="laporan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'laporan.php') ? 'active' : ''; ?>">
                     <?= icon('report') ?> Laporan Bulanan
                 </a>
             </li>
             <?php if ($is_admin): ?>
             <li>
-                <a href="master_data.php" class="nav-item <?php echo ($current_page == 'master_data.php') ? 'active' : ''; ?>">
+                <a href="master_data.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'master_data.php') ? 'active' : ''; ?>">
                     <?= icon('database') ?> Master Data
                 </a>
             </li>
@@ -83,14 +82,14 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             
             <?php if ($is_admin): ?>
             <li style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                <a href="dashboard_super.php" class="nav-item <?php echo ($current_page == 'dashboard_super.php') ? 'active' : ''; ?>">
+                <a href="dashboard_super.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'dashboard_super.php') ? 'active' : ''; ?>">
                     <?= icon('crown') ?> Panel Super Admin
                 </a>
             </li>
             <?php endif; ?>
 
             <li>
-                <a href="pengaturan.php" class="nav-item <?php echo ($current_page == 'pengaturan.php') ? 'active' : ''; ?>">
+                <a href="pengaturan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'pengaturan.php') ? 'active' : ''; ?>">
                     <?= icon('settings') ?> Pengaturan
                 </a>
             </li>

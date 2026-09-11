@@ -57,7 +57,7 @@
     </style>
 </head>
 <body>
-    <?php include 'sidebar_super.php'; ?>
+    <?php include __DIR__ . '/../layouts/sidebar_super.php'; ?>
     <main class="main-content">
         <header class="top-header">
             <h1 class="page-title"><?= icon('report') ?> Audit Trail</h1>

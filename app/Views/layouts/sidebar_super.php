@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$current_page = basename($_SERVER['SCRIPT_NAME']);
 $user_nama = isset($_SESSION['user_nama']) ? $_SESSION['user_nama'] : 'Admin';
 $user_jabatan = isset($_SESSION['user_jabatan']) ? $_SESSION['user_jabatan'] : 'Super Admin';
 $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
@@ -57,53 +56,53 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     <nav class="sidebar-super-nav">
         <ul class="nav-menu">
             <li>
-                <a href="dashboard_super.php" class="nav-item <?= ($current_page == 'dashboard_super.php') ? 'active' : '' ?>">
+                <a href="dashboard_super.php" class="nav-item <?= ($GLOBALS['current_page'] == 'dashboard_super.php') ? 'active' : '' ?>">
                     <?= icon('dashboard') ?> Dashboard Analitik
                 </a>
             </li>
 
             <li class="nav-section-label">Manajemen Data</li>
             <li>
-                <a href="master_data.php" class="nav-item <?= ($current_page == 'master_data.php') ? 'active' : '' ?>">
+                <a href="master_data.php" class="nav-item <?= ($GLOBALS['current_page'] == 'master_data.php') ? 'active' : '' ?>">
                     <?= icon('database') ?> Master Data
                 </a>
             </li>
             <li>
-                <a href="data_permohonan.php" class="nav-item <?= ($current_page == 'data_permohonan.php') ? 'active' : '' ?>">
+                <a href="data_permohonan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'data_permohonan.php') ? 'active' : '' ?>">
                     <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
             <li>
-                <a href="laporan.php" class="nav-item <?= ($current_page == 'laporan.php') ? 'active' : '' ?>">
+                <a href="laporan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'laporan.php') ? 'active' : '' ?>">
                     <?= icon('report') ?> Laporan Bulanan
                 </a>
             </li>
 
             <li class="nav-section-label">Pengguna & Keamanan</li>
             <li>
-                <a href="register.php" class="nav-item <?= ($current_page == 'register.php') ? 'active' : '' ?>">
+                <a href="register.php" class="nav-item <?= ($GLOBALS['current_page'] == 'register.php') ? 'active' : '' ?>">
                     <?= icon('users') ?> Kelola Akun
                 </a>
             </li>
             <li>
-                <a href="audit_trail.php" class="nav-item <?= ($current_page == 'audit_trail.php') ? 'active' : '' ?>">
+                <a href="audit_trail.php" class="nav-item <?= ($GLOBALS['current_page'] == 'audit_trail.php') ? 'active' : '' ?>">
                     <?= icon('report') ?> Audit Trail
                 </a>
             </li>
 
             <li class="nav-section-label">Sistem</li>
             <li>
-                <a href="backup.php" class="nav-item <?= ($current_page == 'backup.php') ? 'active' : '' ?>">
+                <a href="backup.php" class="nav-item <?= ($GLOBALS['current_page'] == 'backup.php') ? 'active' : '' ?>">
                     <?= icon('database') ?> Backup Database
                 </a>
             </li>
             <li>
-                <a href="backup_restore.php" class="nav-item <?= ($current_page == 'backup_restore.php') ? 'active' : '' ?>">
+                <a href="backup_restore.php" class="nav-item <?= ($GLOBALS['current_page'] == 'backup_restore.php') ? 'active' : '' ?>">
                     <?= icon('upload') ?> Restore Database
                 </a>
             </li>
             <li>
-                <a href="pengaturan.php" class="nav-item <?= ($current_page == 'pengaturan.php') ? 'active' : '' ?>">
+                <a href="pengaturan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'pengaturan.php') ? 'active' : '' ?>">
                     <?= icon('settings') ?> Pengaturan
                 </a>
             </li>

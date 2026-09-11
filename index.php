@@ -1,14 +1,31 @@
 <?php
-// Memulai sesi untuk memeriksa status login
-session_start();
+/**
+ * Front controller — satu-satunya pintu masuk aplikasi.
+ *
+ * URL bersih (mis. /arsip_tikkim/dashboard) ATAU ?page=dashboard dipetakan
+ * ke route di app/routes.php lalu di-dispatch ke Controller terkait.
+ *
+ * File .php lama di root (login.php, dashboard.php, dst.) sudah DIHAPUS.
+ * .htaccess mengalihkan pola <nama>.php ke sini (page=<nama>) supaya
+ * link/bookmark lama tetap berfungsi tanpa file stub di root.
+ */
+require __DIR__ . '/app/bootstrap.php';
+require __DIR__ . '/app/routes.php';
 
-// Jika pengguna sudah login, arahkan ke dashboard
-if (isset($_SESSION['login'])) {
-    header("Location: dashboard.php");
-    exit;
-} else {
-    // Jika belum login, arahkan ke halaman login
-    header("Location: login.php");
+$page = isset($_GET['page']) ? trim((string)$_GET['page']) : '';
+
+if ($page === '') {
+    // Kunjungan ke /arsip_tikkim/ tanpa page: arahkan ke dashboard/login.
+    $page = Auth::check() ? 'dashboard' : 'login';
+}
+
+// Untuk penyorotan menu aktif di sidebar (membandingkan 'dashboard.php').
+$GLOBALS['current_page'] = $page . '.php';
+
+if (!Router::has($page)) {
+    http_response_code(404);
+    echo 'Halaman tidak ditemukan: ' . htmlspecialchars($page);
     exit;
 }
-?>
+
+Router::dispatch($page);

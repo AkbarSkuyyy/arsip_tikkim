@@ -38,7 +38,7 @@ $f = Session::flashGet();
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include __DIR__ . '/../layouts/sidebar.php'; ?>
     <main class="main-content">
         <header class="top-header">
             <h1 class="page-title">Master Data</h1>
