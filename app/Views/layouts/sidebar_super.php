@@ -23,7 +23,12 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
 
     .super-mode-badge { margin: 16px 24px 0; padding: 8px 14px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: #F5A623; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
 
-    .sidebar-super-nav { flex: 1; padding: 20px 16px; overflow-y: auto; min-height: 0; }
+    .sidebar-super-nav { flex: 1; padding: 20px 16px; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(245,166,35,0.35) transparent; }
+    .sidebar-super-nav::-webkit-scrollbar { width: 5px; }
+    .sidebar-super-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-super-nav::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.25); border-radius: 10px; transition: background 0.2s; }
+    .sidebar-super-nav:hover::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.5); }
+    .sidebar-super-nav::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.7); }
     .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
     .nav-section-label { font-size: 0.7rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; padding: 16px 18px 6px; }
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
