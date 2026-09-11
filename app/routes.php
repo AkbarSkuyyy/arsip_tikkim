@@ -7,6 +7,7 @@
 Router::get('login', 'AuthController', 'login');
 Router::get('logout', 'AuthController', 'logout');
 Router::get('register', 'UserController', 'register');
+Router::get('kelola_akun', 'UserController', 'index');
 Router::get('edit_user', 'UserController', 'edit');
 Router::get('reset_password', 'UserController', 'resetPassword');
 Router::get('hapus_user', 'UserController', 'destroy');

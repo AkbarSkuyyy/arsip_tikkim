@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Akun - Arsip SPRI</title>
+    <title>Tambah Akun - Arsip SPRI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="asset/css/common.css">
     <style>
@@ -40,7 +40,7 @@
     <?php include __DIR__ . '/../layouts/nav.php'; ?>
     <main class="main-content">
         <header class="top-header">
-            <h1 class="page-title"><?= icon('users') ?> Kelola Akun</h1>
+            <h1 class="page-title"><?= icon('users') ?> Tambah Akun</h1>
         </header>
         <div class="content-wrapper">
             <div class="card">
@@ -93,7 +93,7 @@
                         </div>
                     </div>
                     <div class="btn-group">
-                        <a href="dashboard_super.php" class="btn btn-cancel">Kembali</a>
+                        <a href="kelola_akun.php" class="btn btn-cancel">Kembali</a>
                         <button type="submit" name="register" class="btn btn-primary">Daftarkan Akun</button>
                     </div>
                 </form>

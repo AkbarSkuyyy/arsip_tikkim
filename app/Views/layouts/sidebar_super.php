@@ -87,7 +87,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
 
             <li class="nav-section-label">Pengguna & Keamanan</li>
             <li>
-                <a href="register.php" class="nav-item <?= ($GLOBALS['current_page'] == 'register.php') ? 'active' : '' ?>">
+                <a href="kelola_akun.php" class="nav-item <?= ($GLOBALS['current_page'] == 'kelola_akun.php') ? 'active' : '' ?>">
                     <?= icon('users') ?> Kelola Akun
                 </a>
             </li>

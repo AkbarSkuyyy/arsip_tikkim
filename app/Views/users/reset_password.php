@@ -40,7 +40,7 @@
                 <?php if ($sukses): ?>
                     <div class="alert alert-success">
                         <?= htmlspecialchars($sukses) ?> <br>
-                        <a href="dashboard_super.php" style="color:#065F46; font-weight:bold;">Kembali ke Dashboard</a>
+                        <a href="kelola_akun.php" style="color:#065F46; font-weight:bold;">Kembali ke Kelola Akun</a>
                     </div>
                 <?php endif; ?>
 
@@ -55,7 +55,7 @@
                         <input type="password" name="confirm_password" class="form-control" required minlength="8" placeholder="Ulangi password">
                     </div>
                     <div class="btn-group">
-                        <a href="dashboard_super.php" class="btn btn-cancel">Batal</a>
+                        <a href="kelola_akun.php" class="btn btn-cancel">Batal</a>
                         <button type="submit" name="reset_pw" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>

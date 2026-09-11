@@ -64,7 +64,7 @@
                         </div>
                     </div>
                     <div class="btn-group">
-                        <a href="dashboard_super.php" class="btn btn-cancel">Batal</a>
+                        <a href="kelola_akun.php" class="btn btn-cancel">Batal</a>
                         <button type="submit" name="update_role" class="btn btn-primary">Simpan Perubahan</button>
                     </div>
                 </form>

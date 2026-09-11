@@ -4,6 +4,16 @@
  */
 class UserController
 {
+    public function index(): void
+    {
+        Auth::requireAdmin();
+
+        $users = User::all();
+        $dokumen_list = MasterDokumen::allActive();
+
+        require __DIR__ . '/../Views/users/index.php';
+    }
+
     public function register(): void
     {
         Auth::requireAdmin();
@@ -54,7 +64,7 @@ class UserController
 
         $id = (int)($_GET['id'] ?? 0);
         $user = User::find($id);
-        if (!$user) { header("Location: dashboard_super.php"); exit; }
+        if (!$user) { header("Location: kelola_akun.php"); exit; }
 
         $dokumen_list = MasterDokumen::allActive();
         $akses_sekarang = ($user['akses_dokumen'] ?? '*') === '*'
@@ -72,7 +82,7 @@ class UserController
             }
             Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
             catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
-            header("Location: dashboard_super.php");
+            header("Location: kelola_akun.php");
             exit;
         }
 
@@ -85,7 +95,7 @@ class UserController
 
         $id = (int)($_GET['id'] ?? 0);
         $user = User::find($id);
-        if (!$user) { header("Location: dashboard_super.php"); exit; }
+        if (!$user) { header("Location: kelola_akun.php"); exit; }
 
         $error = "";
         $sukses = "";
@@ -115,7 +125,7 @@ class UserController
         Auth::requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: dashboard_super.php");
+            header("Location: kelola_akun.php");
             exit;
         }
 
@@ -130,7 +140,7 @@ class UserController
             }
         }
 
-        header("Location: dashboard_super.php");
+        header("Location: kelola_akun.php");
         exit;
     }
 }
