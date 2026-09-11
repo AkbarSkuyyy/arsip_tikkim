@@ -53,6 +53,7 @@ $teks_periode = date('d/m/Y', strtotime($tgl_mulai)) . " - " . date('d/m/Y', str
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Rekapitulasi - Arsip SPRI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="asset/css/common.css">
     <style>
         :root {
             --imigrasi-dark: #0A2540;
@@ -153,14 +154,14 @@ $teks_periode = date('d/m/Y', strtotime($tgl_mulai)) . " - " . date('d/m/Y', str
                         <label>Sampai Tanggal</label>
                         <input type="date" name="tgl_selesai" id="tgl_selesai" class="form-control" value="<?php echo htmlspecialchars($tgl_selesai); ?>" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">🔍 Terapkan</button>
-                    
+                    <button type="submit" class="btn btn-primary"><?= icon('search') ?> Terapkan</button>
+
                     <div style="width: 1px; height: 38px; background: var(--border-light); margin: 0 8px;"></div>
-                    
-                    <button type="button" class="btn btn-pdf" onclick="window.print()">📄 Cetak PDF</button>
-                    <a href="export_excel.php?cari=<?php echo urlencode($cari); ?>&tgl_mulai=<?php echo $tgl_mulai; ?>&tgl_selesai=<?php echo $tgl_selesai; ?>" 
+
+                    <button type="button" class="btn btn-pdf" onclick="window.print()"><?= icon('printer') ?> Cetak PDF</button>
+                    <a href="export_excel.php?cari=<?php echo urlencode($cari); ?>&tgl_mulai=<?php echo $tgl_mulai; ?>&tgl_selesai=<?php echo $tgl_selesai; ?>"
                         class="btn btn-excel" style="background-color: var(--excel-green);">
-                        <span>📊</span> Unduh Excel
+                        <span><?= icon('download') ?></span> Unduh Excel
                     </a>
                 </form>
 
@@ -205,9 +206,7 @@ $teks_periode = date('d/m/Y', strtotime($tgl_mulai)) . " - " . date('d/m/Y', str
                         if(count($data_laporan) > 0) {
                             foreach($data_laporan as $row) { 
                                 // Format tanggal lahir jadi DD/MM/YYYY
-                                $tgl_lahir_format = str_pad($row['tanggal_lahir'], 2, "0", STR_PAD_LEFT) . "/" . 
-                                                    str_pad($row['bulan_lahir'], 2, "0", STR_PAD_LEFT) . "/" . 
-                                                    $row['tahun_lahir'];
+                                $tgl_lahir_format = !empty($row['tgl_lahir']) ? date('d/m/Y', strtotime($row['tgl_lahir'])) : '-';
                                 
                                 // Format tanggal input
                                 $tgl_input_format = isset($row['tanggal_input']) ? date('d/m/Y', strtotime($row['tanggal_input'])) : '-';

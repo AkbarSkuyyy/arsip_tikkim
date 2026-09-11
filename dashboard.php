@@ -35,6 +35,19 @@ $data_jk = [$laki, $perempuan];
 
 // 5. Mengambil data 5 permohonan terbaru untuk mini-tabel
 $q_recent = mysqli_query($conn, "SELECT * FROM permohonan ORDER BY id DESC LIMIT 5");
+
+// 6. Tren bulanan (12 bulan terakhir)
+$q_tren = mysqli_query($conn, "SELECT DATE_FORMAT(tanggal_input, '%Y-%m') AS bulan, COUNT(*) AS total FROM permohonan WHERE tanggal_input IS NOT NULL GROUP BY DATE_FORMAT(tanggal_input, '%Y-%m') ORDER BY bulan DESC LIMIT 12");
+$tren_labels = [];
+$tren_data = [];
+while ($r = mysqli_fetch_assoc($q_tren)) { $tren_labels[] = $r['bulan']; $tren_data[] = (int)$r['total']; }
+$tren_labels = array_reverse($tren_labels);
+$tren_data = array_reverse($tren_data);
+$nama_bulan_pendek = ['01'=>'Jan','02'=>'Feb','03'=>'Mar','04'=>'Apr','05'=>'Mei','06'=>'Jun','07'=>'Jul','08'=>'Agu','09'=>'Sep','10'=>'Okt','11'=>'Nov','12'=>'Des'];
+foreach ($tren_labels as $i => $b) {
+    $p = explode('-', $b);
+    $tren_labels[$i] = ($nama_bulan_pendek[$p[1]] ?? $p[1]) . ' ' . $p[0];
+}
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +57,7 @@ $q_recent = mysqli_query($conn, "SELECT * FROM permohonan ORDER BY id DESC LIMIT
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Arsip SPRI - Seksi TIKKIM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="asset/css/common.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -142,6 +156,13 @@ $q_recent = mysqli_query($conn, "SELECT * FROM permohonan ORDER BY id DESC LIMIT
                         <div class="canvas-container">
                             <canvas id="chartStatus"></canvas>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card-container" style="margin-bottom: 32px;">
+                    <h2 class="card-title">Tren Permohonan Bulanan</h2>
+                    <div class="canvas-container" style="height: 280px;">
+                        <canvas id="chartTren"></canvas>
                     </div>
                 </div>
 
@@ -247,6 +268,36 @@ $q_recent = mysqli_query($conn, "SELECT * FROM permohonan ORDER BY id DESC LIMIT
                         grid: { display: false },
                         ticks: { font: { family: 'Inter', weight: 600 } }
                     }
+                }
+            }
+        });
+
+        // Chart Line - Tren Permohonan Bulanan
+        const trenLabels = <?php echo json_encode($tren_labels); ?>;
+        const trenData = <?php echo json_encode($tren_data); ?>;
+        const ctxTren = document.getElementById('chartTren').getContext('2d');
+        new Chart(ctxTren, {
+            type: 'line',
+            data: {
+                labels: trenLabels,
+                datasets: [{
+                    label: 'Jumlah Permohonan',
+                    data: trenData,
+                    borderColor: '#0B427B',
+                    backgroundColor: 'rgba(11,66,123,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#F5A623',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, border: { display: false }, ticks: { font: { family: 'Inter' } } },
+                    x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } }
                 }
             }
         });

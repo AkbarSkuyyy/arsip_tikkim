@@ -55,36 +55,43 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         <ul class="nav-menu">
             <li>
                 <a href="dashboard.php" class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                    <span class="icon">📊</span> Dashboard
+                    <?= icon('dashboard') ?> Dashboard
                 </a>
             </li>
             <li>
                 <a href="data_permohonan.php" class="nav-item <?php echo ($current_page == 'data_permohonan.php') ? 'active' : ''; ?>">
-                    <span class="icon">📁</span> Data Permohonan
+                    <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
             <li>
                 <a href="import_arsip.php" class="nav-item <?php echo ($current_page == 'import_arsip.php') ? 'active' : ''; ?>">
-                    <span class="icon">📥</span> Import Arsip Excel
+                    <?= icon('import') ?> Import Arsip Excel
                 </a>
             </li>
             <li>
                 <a href="laporan.php" class="nav-item <?php echo ($current_page == 'laporan.php') ? 'active' : ''; ?>">
-                    <span class="icon">📈</span> Laporan Bulanan
+                    <?= icon('report') ?> Laporan Bulanan
                 </a>
             </li>
+            <?php if ($is_admin): ?>
+            <li>
+                <a href="master_data.php" class="nav-item <?php echo ($current_page == 'master_data.php') ? 'active' : ''; ?>">
+                    <?= icon('database') ?> Master Data
+                </a>
+            </li>
+            <?php endif; ?>
             
             <?php if ($is_admin): ?>
             <li style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
                 <a href="dashboard_super.php" class="nav-item <?php echo ($current_page == 'dashboard_super.php') ? 'active' : ''; ?>">
-                    <span class="icon">👑</span> Panel Super Admin
+                    <?= icon('crown') ?> Panel Super Admin
                 </a>
             </li>
             <?php endif; ?>
 
             <li>
                 <a href="pengaturan.php" class="nav-item <?php echo ($current_page == 'pengaturan.php') ? 'active' : ''; ?>">
-                    <span class="icon">⚙️</span> Pengaturan
+                    <?= icon('settings') ?> Pengaturan
                 </a>
             </li>
         </ul>
@@ -107,6 +114,6 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             <div style="font-size: 0.75rem; color: #94A3B8;"><?php echo htmlspecialchars($user_jabatan); ?></div>
         </div>
     </div>
-    <a href="logout.php" class="btn-logout" title="Keluar" onclick="return confirm('Yakin ingin keluar?');">🚪</a>
+    <a href="logout.php" class="btn-logout" title="Keluar" onclick="return confirm('Yakin ingin keluar?');"><?= icon('logout') ?></a>
 </div>
 </aside>

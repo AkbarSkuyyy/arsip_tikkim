@@ -10,43 +10,67 @@ if (isset($_SESSION['login'])) {
 $error = "";
 
 if (isset($_POST['login'])) {
-    $user_input = mysqli_real_escape_string($conn, $_POST['user_input']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    csrf_verify();
 
-    // 1. Ambil data user berdasarkan email ATAU username saja (tanpa password di WHERE)
-    $query = "SELECT * FROM users WHERE email = '$user_input' OR username = '$user_input'";
-    $result = mysqli_query($conn, $query);
-
-    // 2. Cek apakah user ditemukan
-    if (mysqli_num_rows($result) === 1) {
-        $row = mysqli_fetch_assoc($result);
-        
-        // 3. Gunakan password_verify untuk mengecek kecocokan password yang di-hash
-        if (password_verify($password, $row['password'])) {
-            
-            // Login Berhasil
-            $_SESSION['login'] = true;
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user_nama'] = $row['nama'];
-            $_SESSION['user_jabatan'] = $row['jabatan'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['user_role'] = $row['role']; // Penting untuk cek Admin/User
-            $_SESSION['user_foto'] = $row['foto_profile'];
-
-            // Catat log (Pastikan fungsi ini sudah didefinisikan/include)
-            if (function_exists('catatLog')) {
-                catatLog($conn, $_SESSION['user_nama'], "User berhasil login ke sistem.");
-            }
-            
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            // Password salah
-            $error = "Password yang Anda masukkan salah!";
-        }
+    // Rate limiting: cegah brute force (5 gagal -> kunci 15 menit)
+    $max_attempts = 5;
+    $lock_seconds = 900;
+    if (isset($_SESSION['lock_until']) && time() < $_SESSION['lock_until']) {
+        $menit = ceil(($_SESSION['lock_until'] - time()) / 60);
+        $error = "Terlalu banyak percobaan login. Coba lagi dalam $menit menit.";
     } else {
-        // User tidak ditemukan
-        $error = "Email atau Username tidak terdaftar!";
+        if (isset($_SESSION['lock_until'])) {
+            unset($_SESSION['lock_until'], $_SESSION['login_attempts']);
+        }
+
+        $user_input = mysqli_real_escape_string($conn, $_POST['user_input']);
+        $password = mysqli_real_escape_string($conn, $_POST['password']);
+
+        // 1. Ambil data user berdasarkan email ATAU username saja (tanpa password di WHERE)
+        $query = "SELECT * FROM users WHERE email = '$user_input' OR username = '$user_input'";
+        $result = mysqli_query($conn, $query);
+
+        // 2. Cek apakah user ditemukan
+        if (mysqli_num_rows($result) === 1) {
+            $row = mysqli_fetch_assoc($result);
+
+            // 3. Gunakan password_verify untuk mengecek kecocokan password yang di-hash
+            if (password_verify($password, $row['password'])) {
+
+                // Login Berhasil
+                unset($_SESSION['login_attempts'], $_SESSION['lock_until']);
+                $_SESSION['login'] = true;
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['user_nama'] = $row['nama'];
+                $_SESSION['user_jabatan'] = $row['jabatan'];
+                $_SESSION['username'] = $row['username'];
+                $_SESSION['user_role'] = $row['role']; // Penting untuk cek Admin/User
+                $_SESSION['user_foto'] = $row['foto_profile'];
+
+                // Catat log (Pastikan fungsi ini sudah didefinisikan/include)
+                if (function_exists('catatLog')) {
+                    catatLog($conn, $_SESSION['user_nama'], "User berhasil login ke sistem.");
+                }
+
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                // Password salah
+                $error = "Password yang Anda masukkan salah!";
+            }
+        } else {
+            // User tidak ditemukan
+            $error = "Email atau Username tidak terdaftar!";
+        }
+
+        // Catat kegagalan & kunci bila melebihi batas
+        if ($error !== "") {
+            $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0) + 1;
+            if ($_SESSION['login_attempts'] >= $max_attempts) {
+                $_SESSION['lock_until'] = time() + $lock_seconds;
+                $error = "Terlalu banyak percobaan gagal. Login dikunci selama 15 menit.";
+            }
+        }
     }
 }
 ?>
@@ -58,6 +82,7 @@ if (isset($_POST['login'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Sistem - Arsip SPRI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="asset/css/common.css">
     <style>
         :root {
             --imigrasi-dark: #0A2540;
@@ -122,6 +147,7 @@ if (isset($_POST['login'])) {
             <?php endif; ?>
 
             <form action="" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="form-group">
                     <label for="user_input">Email atau Username</label>
                     <input type="text" id="user_input" name="user_input" class="form-control" placeholder="Masukkan Email atau Username" required autofocus>

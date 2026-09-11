@@ -18,27 +18,29 @@ $pesan_sukses = "";
 $pesan_error = "";
 
 if (isset($_POST['register'])) {
-    $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $jabatan = mysqli_real_escape_string($conn, $_POST['jabatan']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $role = mysqli_real_escape_string($conn, $_POST['role']); 
-    
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-    $password_hashed = password_hash($password, PASSWORD_DEFAULT);
+    csrf_verify();
 
-    $cek_data = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' OR username = '$username'");
-    
-    if (mysqli_num_rows($cek_data) > 0) {
-        $pesan_error = "Email atau Username tersebut sudah terdaftar!";
+    $nama     = trim($_POST['nama']);
+    $username = trim($_POST['username']);
+    $jabatan  = trim($_POST['jabatan']);
+    $email    = trim($_POST['email']);
+    $role     = ($_POST['role'] === 'admin') ? 'admin' : 'user';
+    $password = $_POST['password'];
+
+    if (strlen($password) < 8) {
+        $pesan_error = "Kata sandi minimal 8 karakter!";
     } else {
-        $query_insert = "INSERT INTO users (nama, username, jabatan, email, password, role) 
-                         VALUES ('$nama', '$username', '$jabatan', '$email', '$password_hashed', '$role')";
-        
-        if (mysqli_query($conn, $query_insert)) {
-            $pesan_sukses = "Akun berhasil dibuat dengan role: $role.";
+        $cek = mysqli_query($conn, "SELECT id FROM users WHERE email = '" . mysqli_real_escape_string($conn, $email) . "' OR username = '" . mysqli_real_escape_string($conn, $username) . "'");
+        if (mysqli_num_rows($cek) > 0) {
+            $pesan_error = "Email atau Username tersebut sudah terdaftar!";
         } else {
-            $pesan_error = "Terjadi kesalahan: " . mysqli_error($conn);
+            $password_hashed = password_hash($password, PASSWORD_DEFAULT);
+            if (db_exec("INSERT INTO users (nama, username, jabatan, email, password, role) VALUES (?, ?, ?, ?, ?, ?)", 'ssssss', [$nama, $username, $jabatan, $email, $password_hashed, $role])) {
+                catatLog($conn, $_SESSION['user_nama'], "Menambah akun baru: " . $username . " (role: " . $role . ")");
+                $pesan_sukses = "Akun berhasil dibuat dengan role: $role.";
+            } else {
+                $pesan_error = "Terjadi kesalahan: " . mysqli_error($conn);
+            }
         }
     }
 }
@@ -51,24 +53,9 @@ if (isset($_POST['register'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Akun Baru - Arsip SPRI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="asset/css/common.css">
     <style>
-        :root {
-            --imigrasi-dark: #0A2540;
-            --imigrasi-blue: #0B427B;
-            --imigrasi-gold: #F5A623;
-            --bg-main: #F4F7FA;
-            --surface: #FFFFFF;
-            --text-dark: #0F172A;
-            --text-blue-grey: #64748B;
-            --border-light: #E2E8F0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-dark);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -100,8 +87,8 @@ if (isset($_POST['register'])) {
             background: linear-gradient(90deg, var(--imigrasi-gold), #D48806);
         }
 
-        .brand-main { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; color: #FFFFFF; }
-        
+        .brand-main { font-size: 1.4rem; font-weight: 700; color: #FFFFFF; }
+
         .login-body { padding: 40px 30px; }
         .login-title { font-size: 1.2rem; font-weight: 600; color: var(--imigrasi-dark); margin-bottom: 24px; text-align: center; }
 
@@ -130,7 +117,7 @@ if (isset($_POST['register'])) {
 
         <div class="login-body">
             <h2 class="login-title">Formulir Registrasi</h2>
-            
+
             <?php if ($pesan_sukses != ""): ?>
                 <div class="alert-success"><?php echo $pesan_sukses; ?></div>
             <?php endif; ?>
@@ -140,6 +127,7 @@ if (isset($_POST['register'])) {
             <?php endif; ?>
 
             <form action="" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="form-group">
                     <label>Nama Lengkap</label>
                     <input type="text" name="nama" class="form-control" placeholder="Masukkan nama lengkap" required>
@@ -158,7 +146,7 @@ if (isset($_POST['register'])) {
                 </div>
                 <div class="form-group">
                     <label>Kata Sandi</label>
-                    <input type="password" name="password" class="form-control" placeholder="Buat kata sandi" required>
+                    <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter" minlength="8" required>
                 </div>
                 <div class="form-group">
                     <label>Role</label>
@@ -170,7 +158,7 @@ if (isset($_POST['register'])) {
                 <button type="submit" name="register" class="btn-login">Daftarkan Akun</button>
             </form>
         </div>
-        
+
         <div class="login-footer">
             <a href="dashboard_super.php">Kembali</a>
         </div>

@@ -8,24 +8,26 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     exit;
 }
 
-if (isset($_GET['id'])) {
-    $id = mysqli_real_escape_string($conn, $_GET['id']);
-    
-    // Ambil nama user untuk log
+// Hapus hanya lewat POST (bukan GET) + CSRF
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: dashboard_super.php");
+    exit;
+}
+
+csrf_verify();
+
+$id = (int)($_POST['id'] ?? 0);
+if ($id > 0) {
+    // Ambil username untuk log
     $query_cek = mysqli_query($conn, "SELECT username FROM users WHERE id = '$id'");
     $user_data = mysqli_fetch_assoc($query_cek);
-    
+
     if ($user_data) {
         $username = $user_data['username'];
-        
-        // Hapus user
-        mysqli_query($conn, "DELETE FROM users WHERE id = '$id'");
-        
-        // Catat log
+        db_exec("DELETE FROM users WHERE id = ?", 'i', [$id]);
         catatLog($conn, $_SESSION['user_nama'], "Menghapus akun user: " . $username);
     }
 }
 
 header("Location: dashboard_super.php");
 exit;
-?>

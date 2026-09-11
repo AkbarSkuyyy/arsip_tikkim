@@ -2,24 +2,36 @@
 session_start();
 require 'koneksi.php';
 
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    exit;
+}
+
 // 1. Ambil data instansi dari database agar otomatis
 $q_instansi = mysqli_query($conn, "SELECT * FROM pengaturan WHERE id = 1");
 $instansi = mysqli_fetch_assoc($q_instansi);
 
 // 2. Ambil parameter filter
-$tgl_mulai = $_GET['tgl_mulai'];
-$tgl_selesai = $_GET['tgl_selesai'];
+$tgl_mulai  = $_GET['tgl_mulai']  ?? date('Y-m-01');
+$tgl_selesai = $_GET['tgl_selesai'] ?? date('Y-m-d');
 
 // 3. Header Excel
 header("Content-type: application/vnd.ms-excel");
-header("Content-Disposition: attachment; filename=Laporan_SPRI_".date('Ymd').".xls");
+header("Content-Disposition: attachment; filename=Laporan_SPRI_" . date('Ymd') . ".xls");
+
+// 4. Query prepared (BETWEEN)
+$stmt = mysqli_prepare($conn, "SELECT * FROM permohonan WHERE tanggal_input BETWEEN ? AND ? ORDER BY tanggal_input ASC, id ASC");
+mysqli_stmt_bind_param($stmt, 'ss', $tgl_mulai, $tgl_selesai);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 ?>
 
 <table style="width:100%; border-collapse: collapse;">
     <tr><td colspan="7" style="text-align:center; font-size:16px; font-weight:bold;"><?php echo strtoupper($instansi['kementerian']); ?></td></tr>
     <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold;"><?php echo strtoupper($instansi['instansi']); ?></td></tr>
     <tr><td colspan="7" style="text-align:center; font-size:12px;"><?php echo $instansi['seksi']; ?></td></tr>
-    <tr><td colspan="7">&nbsp;</td></tr> <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold; text-decoration:underline;">LAPORAN REKAPITULASI DATA PERMOHONAN SPRI</td></tr>
+    <tr><td colspan="7">&nbsp;</td></tr>
+    <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold; text-decoration:underline;">LAPORAN REKAPITULASI DATA PERMOHONAN SPRI</td></tr>
     <tr><td colspan="7" style="text-align:center;">Periode: <?php echo date('d-m-Y', strtotime($tgl_mulai)) . " s/d " . date('d-m-Y', strtotime($tgl_selesai)); ?></td></tr>
     <tr><td colspan="7">&nbsp;</td></tr>
 </table>
@@ -37,21 +49,19 @@ header("Content-Disposition: attachment; filename=Laporan_SPRI_".date('Ymd').".x
         </tr>
     </thead>
     <tbody>
-        <?php 
-        $query = "SELECT * FROM permohonan WHERE tanggal_input BETWEEN '$tgl_mulai' AND '$tgl_selesai' ORDER BY tanggal_input ASC";
-        $result = mysqli_query($conn, $query);
+        <?php
         $no = 1;
-        while($row = mysqli_fetch_assoc($result)): 
-            $tgl_lahir = $row['tanggal_lahir'] . "/" . $row['bulan_lahir'] . "/" . $row['tahun_lahir'];
+        while($row = mysqli_fetch_assoc($result)):
+            $tgl_lahir = !empty($row['tgl_lahir']) ? date('d/m/Y', strtotime($row['tgl_lahir'])) : '-';
         ?>
         <tr style="text-align: center;">
             <td><?php echo $no++; ?></td>
-            <td style="text-align: left;"><?php echo $row['nama_pemohon']; ?></td>
+            <td style="text-align: left;"><?php echo htmlspecialchars($row['nama_pemohon']); ?></td>
             <td><?php echo $tgl_lahir; ?></td>
             <td><?php echo date('d/m/Y', strtotime($row['tanggal_input'])); ?></td>
-            <td><?php echo $row['dokumen']; ?></td>
-            <td><?php echo $row['jenis_kelamin']; ?></td>
-            <td><?php echo $row['keterangan']; ?></td>
+            <td><?php echo htmlspecialchars($row['dokumen']); ?></td>
+            <td><?php echo htmlspecialchars($row['jenis_kelamin']); ?></td>
+            <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
         </tr>
         <?php endwhile; ?>
     </tbody>
