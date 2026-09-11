@@ -85,6 +85,7 @@
         .seri-preview.is-empty { opacity: 0.35; font-weight: 500; }
         .field-dinamis { display: none; }
         .field-dinamis.show { display: flex; }
+        .lokasi-info-hidden { display: none !important; }
         .modal-footer { padding: 20px 30px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 15px; background: var(--bg-main); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; flex-shrink: 0; }
         .btn-cancel { padding: 10px 24px; background: var(--surface); border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-blue-grey); transition: 0.2s;}
         .btn-cancel:hover { background: #E2E8F0; color: var(--text-dark); }
@@ -414,7 +415,7 @@
                             <input type="text" name="catatan_lain" class="form-control" maxlength="255" placeholder="Jelaskan jenis dokumen/keperluan lainnya">
                         </div>
 
-                        <div class="form-group-modal full-width" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                        <div id="lokasi_info" class="form-group-modal full-width <?= ($jenis === '1') ? '' : 'lokasi-info-hidden' ?>" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
                             <?= icon('archive') ?>
                             <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">Lokasi arsip (Loker · Rak · Kotak) diisi <u>otomatis</u> oleh sistem sesuai slot kosong berikutnya — tidak perlu dipilih manual.</span>
                         </div>
@@ -562,6 +563,12 @@
                 el.classList.toggle('show', cocok);
                 el.querySelectorAll('input, select').forEach(function (f) { f.disabled = !cocok; });
             });
+            if (modalId === 'modalTambah') {
+                const lokasiInfo = document.getElementById('lokasi_info');
+                if (lokasiInfo) {
+                    lokasiInfo.classList.toggle('lokasi-info-hidden', kodeAktif !== '1');
+                }
+            }
         }
         (function () {
             const dokSel = document.getElementById('tambah_dokumen');
