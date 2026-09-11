@@ -5,7 +5,10 @@ Prioritas berdasar dampak vs usaha, dan risiko teknis yang sudah ditemukan di ko
 > **Status terbaru:** mayoritas rekomendasi prioritas sudah direalisasikan —
 > prepared statements, CSRF, migrasi `tgl_lahir DATE`, konsolidasi MVC,
 > toast, SVG, ekstrak CSS, master dokumen/keterangan/loker, rate limiting,
-> backup+restore, dan **lokasi fisik arsip (loker → rak → kotak)**.
+> backup+restore, **lokasi fisik arsip (loker → rak → kotak) dengan
+> auto-assign**, **akses dokumen per akun (single-doc, diatur superadmin)**,
+> **Kelola Akun terpisah dari form registrasi**, **timezone Asia/Jakarta**,
+> dan **field dinamis + nomor permohonan per jenis dokumen**.
 
 ---
 
@@ -52,13 +55,25 @@ Prioritas berdasar dampak vs usaha, dan risiko teknis yang sudah ditemukan di ko
 - Rate limiting login (cegah brute force).
 - Role granular (admin seksi vs operator vs viewer).
 - Enforce password min 8 char + `password_hash` (sudah ada, perlu enforce di form).
+- Akses dokumen per akun (single-doc, diatur superadmin) — ✅ sudah.
+- Kelola Akun (daftar + info) terpisah dari form Tambah Akun — ✅ sudah.
 
 ### 2.6 Lokasi Fisik Arsip (Loker → Rak → Kotak) — ✅ sudah
 - `master_loker` (11 loker) + kolom `loker_id`, `rak`, `kotak` di `permohonan`.
-- Form tambah/edit: pilih Loker, isi Rak & Kotak.
+- **Auto-assign otomatis** untuk data baru — tidak lagi pilih manual di form Tambah.
+  Sekuensial: isi Kotak dulu, baru pindah Rak, baru pindah Loker berikutnya.
+- Kapasitas sesuai unit fisik: Loker 1-8 (unit besar) = 5 rak (A-E) × 200 kotak;
+  Loker 9-11 (unit "3 setir"/roll o'pack, 1 loker = 1 baris/setir) = 4 rak (A-D) × 100 kotak.
+- Form Edit tetap simpan field manual Loker/Rak/Kotak (koreksi data lama).
 - Tabel list: kolom LOKASI (`Loker 7 · Rak A · Kotak 3`).
-- Filter Loker + Peta Loker (grid 11 kartu, jumlah arsip per loker).
+- Filter Loker + Peta Loker (grid 11 kartu, jumlah arsip per loker, badge seri kode `L{loker}-R{rak}-K{kotak}`).
+- Data lama (arsip sebelum fitur ini, `loker_id=0`) tidak dimigrasi otomatis — tetap manual via Edit.
 - Fase berikutnya (opsional): label QR/barcode per kotak → scan buka record.
+
+### 2.7 Field Dinamis & Nomor Permohonan per Jenis Dokumen — ✅ sudah
+- Kolom baru: `no_permohonan`, `kewarganegaraan`, `no_paspor_kebangsaan`, `no_izin_tinggal`, `masa_berlaku`, `nama_penjamin`, `catatan_lain`.
+- Form Tambah/Edit toggle field sesuai jenis dokumen dipilih (JS `toggleFieldDinamis()`):
+  SPRI/Paspor Biasa (standar), Izin Tinggal WNA (kewarganegaraan dst.), Lainnya (catatan bebas).
 
 ---
 

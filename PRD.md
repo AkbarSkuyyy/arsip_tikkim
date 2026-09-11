@@ -46,10 +46,10 @@ dan **Penggantian Paspor**.
 ## 4. Persona / Pengguna
 
 | Role   | Deskripsi                              | Kebutuhan Utama                          |
-| ------ | -------------------------------------- | ---------------------------------------- |
+| ------ | --------------------------------------- | ----------------------------------------- |
 | Admin  | Kepala/penanggung jawab seksi          | Kelola user, lihat semua data & rekap, backup |
-| User   | Staff arsip / operator TIKKIM          | Input, edit, cari, import, cetak laporan |
-| Super Admin | Pengelola sistem                 | Kelola user & role, pengaturan instansi |
+| User   | Staff arsip / operator TIKKIM          | Input, edit, cari, cetak laporan — dibatasi 1 jenis dokumen (diatur superadmin) |
+| Super Admin | Pengelola sistem                 | Kelola user & role, akses dokumen per user, pengaturan instansi |
 
 ---
 
@@ -57,11 +57,11 @@ dan **Penggantian Paspor**.
 
 ### Di dalam lingkup
 
-- Autentikasi & otorisasi (role admin/user).
-- CRUD data permohonan SPRI.
-- Filter bulan/tahun/loker, pencarian nama, pagination.
+- Autentikasi & otorisasi (role admin/user; user dibatasi 1 jenis dokumen).
+- CRUD data permohonan (SPRI, Paspor Biasa, Izin Tinggal, Lainnya) dengan field dinamis per jenis.
+- Filter bulan/tahun/loker/jenis dokumen, pencarian nama, pagination.
 - Rekap otomatis (total, Baru, Penggantian, L/P).
-- Lokasi fisik arsip (loker → rak → kotak) + peta loker.
+- Lokasi fisik arsip (loker → rak → kotak) otomatis (auto-assign) + peta loker + seri lokasi.
 - Import CSV & export Excel.
 - Laporan periode (rentang tanggal) siap cetak.
 - Pengaturan identitas instansi (kop laporan).
@@ -86,12 +86,13 @@ dan **Penggantian Paspor**.
 - **FR-1.3** Reset password.
 - **FR-1.4** Logout menghapus sesi & mencatat log.
 
-### FR-2 Manajemen User (Admin)
+### FR-2 Manajemen User (Superadmin)
 
-- **FR-2.1** Tambah user (nama, username, jabatan, email, password, role, foto).
-- **FR-2.2** Edit user.
-- **FR-2.3** Hapus user.
-- **FR-2.4** Ubah role (`admin` ↔ `user`).
+- **FR-2.1** Kelola Akun: daftar akun + info (nama, username, jabatan, email, role, akses dokumen) — halaman tersendiri (`kelola_akun.php`), terpisah dari form tambah akun.
+- **FR-2.2** Tambah akun (`register.php`): nama, username, jabatan, email, password, role, foto, **akses dokumen (radio, tepat 1 jenis untuk role user)**.
+- **FR-2.3** Edit user (radio akses dokumen tunggal, konsisten dengan tambah).
+- **FR-2.4** Hapus user.
+- **FR-2.5** Ubah role (`admin` ↔ `user`); admin/superadmin akses semua jenis dokumen, user dibatasi 1 jenis yang diatur superadmin.
 
 ### FR-3 Dashboard
 
@@ -101,14 +102,19 @@ dan **Penggantian Paspor**.
 
 ### FR-4 Data Permohonan
 
-- **FR-4.1** Tambah data (popup): nama, tanggal lahir, jenis dokumen, jenis kelamin, keterangan, tanggal input, lokasi (loker, rak, kotak).
-- **FR-4.2** Edit data (popup), hanya 1 ID valid.
+- **FR-4.1** Tambah data (popup): nama, **nomor permohonan**, tanggal lahir, jenis dokumen, jenis kelamin, keterangan, tanggal input. Lokasi (loker/rak/kotak) **tidak diisi manual** — otomatis (lihat FR-4.9).
+- **FR-4.1a** Field dinamis per jenis dokumen (toggle JS sesuai jenis dipilih):
+  - SPRI / Paspor Biasa: field standar saja (nama, tgl lahir, JK).
+  - Izin Tinggal (WNA): + kewarganegaraan, no. paspor kebangsaan, no. izin tinggal (KITAS/KITAP), masa berlaku, nama penjamin/sponsor.
+  - Lainnya: + catatan/keterangan bebas.
+- **FR-4.2** Edit data (popup), hanya 1 ID valid. Field Loker/Rak/Kotak **tetap manual di form Edit** (untuk koreksi data lama/data lama sebelum auto-assign).
 - **FR-4.3** Hapus data dengan konfirmasi.
-- **FR-4.4** Filter bulan + tahun + loker.
+- **FR-4.4** Filter bulan + tahun + loker + jenis dokumen (dibatasi otomatis kalau akun user hanya punya akses 1 jenis).
 - **FR-4.5** Pencarian nama (`LIKE`).
 - **FR-4.6** Pagination 15 baris/halaman.
-- **FR-4.7** Rekap bulanan ringkas (total, baru, penggantian, L/P).
-- **FR-4.8** Kolom LOKASI di tabel + Peta Loker (grid 11 loker, jumlah arsip per loker).
+- **FR-4.7** Rekap bulanan ringkas (total, baru, penggantian, L/P), realtime via polling AJAX (10 detik).
+- **FR-4.8** Kolom LOKASI di tabel + Peta Loker (grid 11 loker, jumlah arsip per loker, badge seri kode `Loker-Rak-Kotak`).
+- **FR-4.9** Auto-assign lokasi arsip (loker → rak → kotak) untuk data BARU: sistem cari slot kosong berikutnya secara sekuensial (isi kotak dulu, baru pindah rak, baru pindah loker), sesuai kapasitas fisik tiap unit (lihat §8 Model Data). Data lama (`loker_id=0`) tidak dimigrasi otomatis.
 
 ### FR-5 Import Arsip (CSV)
 
@@ -158,10 +164,10 @@ dan **Penggantian Paspor**.
 
 | Tabel            | Kolom Kunci                                                  |
 | ---------------- | ------------------------------------------------------------ |
-| `users`          | id, nama, username, jabatan, email, password (hash), role, foto_profile |
-| `permohonan`     | id, nama_pemohon, tgl_lahir (DATE), dokumen, jenis_kelamin, keterangan, tanggal_input, loker_id, rak, kotak |
-| `master_loker`   | id, nomor, nama, aktif (11 loker fisik)                      |
-| `master_dokumen` | id, kode, nama, aktif (jenis dokumen)                        |
+| `users`          | id, nama, username, jabatan, email, password (hash), role, foto_profile, **akses_dokumen** (kode jenis dokumen tunggal; `*` = semua, hanya admin/superadmin) |
+| `permohonan`     | id, nama_pemohon, **no_permohonan**, tgl_lahir (DATE), dokumen, jenis_kelamin, **kewarganegaraan, no_paspor_kebangsaan, no_izin_tinggal, masa_berlaku, nama_penjamin, catatan_lain** (field dinamis Izin Tinggal/Lainnya), keterangan, tanggal_input, loker_id, rak, kotak |
+| `master_loker`   | id, nomor, nama, aktif (11 loker fisik: 1-8 unit besar 5 rak A-E ×200 kotak; 9-11 unit "3 setir"/roll o'pack, 1 loker = 1 baris, 4 rak A-D ×100 kotak) |
+| `master_dokumen` | id, kode, nama, aktif (SPRI, Paspor Biasa, Izin Tinggal, Lainnya) |
 | `master_keterangan` | id, nama, aktif (Baru / Penggantian Paspor / dll)         |
 | `permohonan_spri`| id, no_urut, nama_pemohon (template 12 bulan)                |
 | `pengaturan`     | id, kementerian, instansi, seksi, pejabat_nama/jabatan/nip   |
@@ -203,6 +209,7 @@ dan **Penggantian Paspor**.
 | M4        | Hardening: PDO/prepared, CSRF, validasi, toast, SVG    |
 | M5        | Refactor MVC + deploy cPanel                           |
 | M6        | Lokasi fisik arsip (loker → rak → kotak) + peta loker  |
+| M7        | Akses dokumen per akun (single-doc), Kelola Akun terpisah, timezone Asia/Jakarta, field dinamis per jenis dokumen, nomor permohonan, auto-assign lokasi |
 
 ---
 
