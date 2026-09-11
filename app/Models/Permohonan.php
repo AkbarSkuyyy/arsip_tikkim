@@ -109,6 +109,33 @@ class Permohonan
     }
 
     /**
+     * Proporsi lengkap tiap keterangan (dari master_keterangan, termasuk
+     * yang belum punya data). Return: [ ['nama','jumlah','persen'], ... ]
+     */
+    public static function keteranganProportion(): array
+    {
+        $r = Database::raw("
+            SELECT mk.nama, COUNT(p.id) AS jumlah
+            FROM master_keterangan mk
+            LEFT JOIN permohonan p ON p.keterangan = mk.nama
+            WHERE mk.aktif = 1
+            GROUP BY mk.id, mk.nama
+            ORDER BY jumlah DESC, mk.nama ASC
+        ");
+        $rows = [];
+        $total = 0;
+        while ($row = mysqli_fetch_assoc($r)) {
+            $rows[] = ['nama' => $row['nama'], 'jumlah' => (int)$row['jumlah']];
+            $total += (int)$row['jumlah'];
+        }
+        foreach ($rows as &$row) {
+            $row['persen'] = $total > 0 ? round($row['jumlah'] / $total * 100, 2) : 0.0;
+        }
+        unset($row);
+        return $rows;
+    }
+
+    /**
      * Query filter+paging untuk data_permohonan.php (kelola arsip per bulan).
      */
     public static function search(string $keyword, int $bulan, int $tahun, int $limit, int $offset): array

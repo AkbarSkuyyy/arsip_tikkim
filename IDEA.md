@@ -11,7 +11,7 @@ Dokumen ini berisi konsep, kondisi saat ini, dan arah pengembangan aplikasi arsi
 Aplikasi web untuk mendigitalisasi arsip **SPRI** (Surat Permohonan penerbitan
 dokumen perjalanan / paspor) yang sebelumnya dicatat manual. Data permohonan
 paspor (nama, tanggal lahir, jenis kelamin, jenis dokumen, status Baru /
-Penggantian HB) direkam, direkap, dan dicetak menjadi laporan bulanan.
+Penggantian Paspor) direkam, direkap, dan dicetak menjadi laporan bulanan.
 
 **Tujuan:**
 
@@ -26,7 +26,7 @@ Penggantian HB) direkam, direkap, dan dicetak menjadi laporan bulanan.
 ## 2. Latar Belakang
 
 Seksi TIKKIM memproses permohonan paspor setiap hari. Arsip SPRI berisi daftar
-pemohon beserta jenis permohonan (paspor **Baru** atau **Penggantian HB** —
+pemohon beserta jenis permohonan (paspor **Baru** atau **Penggantian Paspor** —
 habis berlaku). Sebelumnya rekap dilakukan manual sehingga rawan salah hitung,
 sulit dicari, dan lambat saat dibutuhkan laporan.
 

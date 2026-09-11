@@ -103,6 +103,25 @@
                 <div class="card-container">
                     <h2 class="card-title" style="margin-bottom: 20px;">Proporsi Keterangan</h2>
                     <div class="canvas-container"><canvas id="chartKeterangan"></canvas></div>
+                    <table class="proporsi-list">
+                        <thead><tr><th>KETERANGAN</th><th>JUMLAH</th><th>PROPORSI</th></tr></thead>
+                        <tbody>
+                            <?php foreach ($ket_proporsi as $k): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($k['nama']) ?></td>
+                                <td><?= (int)$k['jumlah'] ?></td>
+                                <td><?= number_format((float)$k['persen'], 1, ',', '.') ?>%</td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td><strong>TOTAL</strong></td>
+                                <td><strong><?= (int)$ket_total ?></strong></td>
+                                <td><strong>100%</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
                 <div class="card-container">
                     <h2 class="card-title" style="margin-bottom: 20px;">Komposisi Role Pengguna</h2>

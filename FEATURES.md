@@ -40,7 +40,7 @@ Prioritas berdasar dampak vs usaha, dan risiko teknis yang sudah ditemukan di ko
 
 ### 2.4 Master Data
 - Tabel master **jenis dokumen** (relasi ke `permohonan.dokumen`).
-- Tabel master **keterangan** (Baru / Penggantian HB / lainnya) supaya tidak teks bebas.
+- Tabel master **keterangan** (Baru / Penggantian Paspor / lainnya) supaya tidak teks bebas.
 
 ### 2.5 Keamanan & Akun
 - Rate limiting login (cegah brute force).

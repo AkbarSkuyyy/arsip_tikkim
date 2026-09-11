@@ -116,7 +116,7 @@
                     <div class="rekap-item">Laki-laki: <span><?= $total_L ?></span></div>
                     <div class="rekap-item">Perempuan: <span><?= $total_P ?></span></div>
                     <div class="rekap-item">Baru: <span><?= $total_baru ?></span></div>
-                    <div class="rekap-item">Penggantian: <span><?= $total_ganti ?></span></div>
+                    <div class="rekap-item">Penggantian Paspor: <span><?= $total_ganti ?></span></div>
                 </div>
                 <table id="tabelLaporan">
                     <thead>

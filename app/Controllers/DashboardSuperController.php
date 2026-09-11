@@ -17,6 +17,8 @@ class DashboardSuperController
 
         [$dok_labels, $dok_data] = Permohonan::dokumenBreakdown();
         [$ket_labels, $ket_data] = Permohonan::keteranganBreakdown();
+        $ket_proporsi = Permohonan::keteranganProportion();
+        $ket_total = array_sum(array_column($ket_proporsi, 'jumlah'));
         [$tren_labels, $tren_data] = Permohonan::monthlyTrend(12);
 
         $nama_bulan_pendek = ['01'=>'Jan','02'=>'Feb','03'=>'Mar','04'=>'Apr','05'=>'Mei','06'=>'Jun','07'=>'Jul','08'=>'Agu','09'=>'Sep','10'=>'Okt','11'=>'Nov','12'=>'Des'];

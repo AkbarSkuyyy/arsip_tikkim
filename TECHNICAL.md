@@ -106,7 +106,7 @@ CREATE TABLE `permohonan` (
   `tanggal_lahir` varchar(2) NOT NULL,
   `dokumen` varchar(10) NOT NULL,          -- kode jenis dokumen (mis. '1')
   `jenis_kelamin` varchar(1) NOT NULL,     -- 'L' | 'P'
-  `keterangan` varchar(50) NOT NULL,       -- 'Baru' | 'Penggantian HB'
+  `keterangan` varchar(50) NOT NULL,       -- 'Baru' | 'Penggantian Paspor'
   `tanggal_input` date DEFAULT NULL,
   PRIMARY KEY (`id`)
 );

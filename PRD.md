@@ -19,7 +19,7 @@ otomatis per bulan dan diekspor.
 ## 2. Latar Belakang & Masalah
 
 Seksi TIKKIM memproses permohonan paspor harian dengan dua status: **Baru**
-dan **Penggantian HB** (habis berlaku).
+dan **Penggantian Paspor**.
 
 **Masalah saat ini:**
 
