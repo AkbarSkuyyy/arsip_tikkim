@@ -92,6 +92,11 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
                 </a>
             </li>
             <li>
+                <a href="register.php" class="nav-item <?= ($GLOBALS['current_page'] == 'register.php') ? 'active' : '' ?>" style="padding-left: 34px;">
+                    <?= icon('edit') ?> Tambah Akun
+                </a>
+            </li>
+            <li>
                 <a href="audit_trail.php" class="nav-item <?= ($GLOBALS['current_page'] == 'audit_trail.php') ? 'active' : '' ?>">
                     <?= icon('report') ?> Audit Trail
                 </a>
