@@ -122,6 +122,42 @@ $f = Session::flashGet();
                     <div class="note">Dipilih di form input permohonan.</div>
                 </div>
             </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <h2><?= icon('archive') ?> Loker Arsip (<?= count($loker_list) ?>)</h2>
+                <?php if ($is_admin): ?>
+                <form method="POST" class="form-inline">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="aksi" value="loker_simpan">
+                    <input type="text" name="nomor" placeholder="Nomor (mis. 12)" required style="max-width: 120px;">
+                    <input type="text" name="nama" placeholder="Label loker (mis. Loker 12)" required>
+                    <button type="submit" class="btn-sm btn-primary">Tambah</button>
+                </form>
+                <?php endif; ?>
+                <table>
+                    <thead><tr><th>Nomor</th><th>Label</th><th>Status</th><?php if ($is_admin): ?><th></th><?php endif; ?></tr></thead>
+                    <tbody>
+                    <?php foreach ($loker_list as $l): ?>
+                        <tr>
+                            <td style="font-weight:600;"><?= htmlspecialchars($l['nomor']) ?></td>
+                            <td><?= htmlspecialchars($l['nama']) ?></td>
+                            <td><span class="badge <?= $l['aktif'] ? 'badge-aktif' : 'badge-non' ?>"><?= $l['aktif'] ? 'Aktif' : 'Nonaktif' ?></span></td>
+                            <?php if ($is_admin && $l['aktif']): ?>
+                            <td style="text-align:right;">
+                                <form method="POST" style="display:inline;">
+                                    <?= Csrf::field() ?>
+                                    <input type="hidden" name="aksi" value="loker_hapus">
+                                    <input type="hidden" name="id" value="<?= (int)$l['id'] ?>">
+                                    <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Nonaktifkan loker ini?')">Nonaktifkan</button>
+                                </form>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <div class="note">Lokasi fisik arsip: Loker &rarr; Rak &rarr; Kotak. Dipilih di form tambah/edit permohonan.</div>
+            </div>
         </div>
     </main>
 </body>

@@ -39,6 +39,19 @@ class MasterDataController
             } elseif ($aksi === 'keterangan_hapus') {
                 MasterKeterangan::deactivate((int)$_POST['id']);
                 Session::flashSet('success', 'Keterangan dinonaktifkan.');
+            } elseif ($aksi === 'loker_simpan') {
+                $nomor = trim($_POST['nomor']);
+                $nama = trim($_POST['nama']);
+                if ($nomor !== '' && $nama !== '') {
+                    if (MasterLoker::upsert($nomor, $nama)) {
+                        Session::flashSet('success', 'Loker disimpan.');
+                    } else {
+                        Session::flashSet('error', 'Gagal menyimpan loker.');
+                    }
+                }
+            } elseif ($aksi === 'loker_hapus') {
+                MasterLoker::deactivate((int)$_POST['id']);
+                Session::flashSet('success', 'Loker dinonaktifkan.');
             }
 
             header("Location: master_data.php");
@@ -47,6 +60,7 @@ class MasterDataController
 
         $dokumen_list = MasterDokumen::all();
         $ket_list = MasterKeterangan::all();
+        $loker_list = MasterLoker::all();
 
         require __DIR__ . '/../Views/master_data/index.php';
     }

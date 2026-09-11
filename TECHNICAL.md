@@ -101,19 +101,33 @@ CREATE TABLE `users` (
 CREATE TABLE `permohonan` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nama_pemohon` varchar(100) NOT NULL,
-  `tahun_lahir` varchar(4) NOT NULL,
-  `bulan_lahir` varchar(2) NOT NULL,
-  `tanggal_lahir` varchar(2) NOT NULL,
+  `tgl_lahir` date DEFAULT NULL,
   `dokumen` varchar(10) NOT NULL,          -- kode jenis dokumen (mis. '1')
   `jenis_kelamin` varchar(1) NOT NULL,     -- 'L' | 'P'
   `keterangan` varchar(50) NOT NULL,       -- 'Baru' | 'Penggantian Paspor'
   `tanggal_input` date DEFAULT NULL,
+  `loker_id` int(11) NOT NULL DEFAULT 0,   -- FK master_loker.id (0 = belum ditempatkan)
+  `rak` varchar(5) NOT NULL DEFAULT '',    -- rak dalam loker (mis. 'A')
+  `kotak` varchar(20) NOT NULL DEFAULT '', -- kotak/berkas dalam rak
   PRIMARY KEY (`id`)
 );
 ```
 
-> Catatan: tanggal lahir dipecah 3 kolom varchar → validasi lemah (ada data
-> `tanggal_lahir = '80'` / `'87'`). Target: satu kolom `tgl_lahir DATE`.
+> Catatan: tanggal lahir telah dimigrasi ke satu kolom `tgl_lahir DATE`.
+> Lokasi fisik arsip: `loker_id` -> `master_loker`, `rak`, `kotak`.
+
+### `master_loker`
+```sql
+CREATE TABLE `master_loker` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nomor` varchar(10) NOT NULL,
+  `nama` varchar(100) DEFAULT NULL,
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nomor` (`nomor`)
+);
+```
+> Lokasi fisik arsip: Loker -> Rak -> Kotak. 11 loker di-seed default.
 
 ### `permohonan_spri`
 ```sql

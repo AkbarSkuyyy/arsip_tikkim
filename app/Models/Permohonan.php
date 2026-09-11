@@ -15,18 +15,18 @@ class Permohonan
     public static function create(array $data): bool
     {
         return Database::exec(
-            "INSERT INTO permohonan (nama_pemohon, tgl_lahir, dokumen, jenis_kelamin, keterangan, tanggal_input) VALUES (?, ?, ?, ?, ?, ?)",
-            'ssssss',
-            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input']]
+            "INSERT INTO permohonan (nama_pemohon, tgl_lahir, dokumen, jenis_kelamin, keterangan, tanggal_input, loker_id, rak, kotak) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            'ssssssiss',
+            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak']]
         );
     }
 
     public static function update(int $id, array $data): bool
     {
         return Database::exec(
-            "UPDATE permohonan SET nama_pemohon = ?, tgl_lahir = ?, dokumen = ?, jenis_kelamin = ?, keterangan = ?, tanggal_input = ? WHERE id = ?",
-            'ssssssi',
-            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input'], $id]
+            "UPDATE permohonan SET nama_pemohon = ?, tgl_lahir = ?, dokumen = ?, jenis_kelamin = ?, keterangan = ?, tanggal_input = ?, loker_id = ?, rak = ?, kotak = ? WHERE id = ?",
+            'ssssssissi',
+            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'], $id]
         );
     }
 
@@ -136,19 +136,43 @@ class Permohonan
     }
 
     /**
+     * Peta loker: total arsip per loker aktif (semua periode) untuk grid
+     * "Peta Loker" di data_permohonan.php.
+     */
+    public static function lokerMap(): array
+    {
+        $r = Database::raw("
+            SELECT ml.id, ml.nomor, ml.nama, COUNT(p.id) AS jumlah
+            FROM master_loker ml
+            LEFT JOIN permohonan p ON p.loker_id = ml.id
+            WHERE ml.aktif = 1
+            GROUP BY ml.id, ml.nomor, ml.nama
+            ORDER BY CAST(ml.nomor AS UNSIGNED) ASC
+        ");
+        $rows = [];
+        while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
+        return $rows;
+    }
+
+    /**
      * Query filter+paging untuk data_permohonan.php (kelola arsip per bulan).
      */
-    public static function search(string $keyword, int $bulan, int $tahun, int $limit, int $offset): array
+    public static function search(string $keyword, int $bulan, int $tahun, int $limit, int $offset, int $lokerId = 0): array
     {
-        $sql = "SELECT * FROM permohonan WHERE MONTH(tanggal_input) = ? AND YEAR(tanggal_input) = ?";
+        $sql = "SELECT p.*, ml.nomor AS loker_nomor FROM permohonan p LEFT JOIN master_loker ml ON ml.id = p.loker_id WHERE MONTH(p.tanggal_input) = ? AND YEAR(p.tanggal_input) = ?";
         $types = 'ii';
         $params = [$bulan, $tahun];
+        if ($lokerId > 0) {
+            $sql .= " AND p.loker_id = ?";
+            $types .= 'i';
+            $params[] = $lokerId;
+        }
         if ($keyword !== '') {
-            $sql .= " AND nama_pemohon LIKE ?";
+            $sql .= " AND p.nama_pemohon LIKE ?";
             $types .= 's';
             $params[] = "%$keyword%";
         }
-        $sql .= " ORDER BY id DESC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY p.id DESC LIMIT ? OFFSET ?";
         $types .= 'ii';
         $params[] = $limit;
         $params[] = $offset;
@@ -158,11 +182,16 @@ class Permohonan
         return $rows;
     }
 
-    public static function searchCount(string $keyword, int $bulan, int $tahun): int
+    public static function searchCount(string $keyword, int $bulan, int $tahun, int $lokerId = 0): int
     {
         $sql = "SELECT COUNT(*) as total FROM permohonan WHERE MONTH(tanggal_input) = ? AND YEAR(tanggal_input) = ?";
         $types = 'ii';
         $params = [$bulan, $tahun];
+        if ($lokerId > 0) {
+            $sql .= " AND loker_id = ?";
+            $types .= 'i';
+            $params[] = $lokerId;
+        }
         if ($keyword !== '') {
             $sql .= " AND nama_pemohon LIKE ?";
             $types .= 's';

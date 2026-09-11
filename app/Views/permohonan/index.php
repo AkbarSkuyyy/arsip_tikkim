@@ -2,8 +2,9 @@
 /**
  * View: kelola arsip permohonan (CRUD modal + filter bulan/tahun + pagination).
  * Variabel dari PermohonanController::index(): $bulan_pilihan, $tahun_pilihan, $keyword,
- * $nama_bulan, $rekap, $batas_per_halaman, $halaman_aktif, $halaman_awal,
- * $total_semua_data, $total_halaman, $data_rows
+ * $loker_pilihan, $nama_bulan, $rekap, $batas_per_halaman, $halaman_aktif, $halaman_awal,
+ * $total_semua_data, $total_halaman, $data_rows, $dokumen_list, $ket_list,
+ * $loker_list, $loker_map
  */
 ?>
 <!DOCTYPE html>
@@ -85,6 +86,13 @@
         .btn-save { padding: 10px 24px; background: var(--imigrasi-blue); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: white; transition: 0.2s; box-shadow: 0 4px 12px rgba(11,66,123,0.2); display: inline-flex; align-items: center; gap: 8px;}
         .btn-save:hover { background: #08305A; transform: translateY(-1px); }
         .icon svg { width: 16px; height: 16px; }
+        .badge-lokasi { background: rgba(99, 102, 241, 0.1); color: #4F46E5; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .loker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
+        .loker-card { background: var(--bg-main); border: 1px solid var(--border-light); border-radius: 12px; padding: 14px 8px; text-align: center; text-decoration: none; color: var(--text-dark); transition: 0.2s; }
+        .loker-card:hover { border-color: var(--imigrasi-blue); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(11,66,123,0.1); }
+        .loker-nomor { font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); }
+        .loker-jumlah { font-size: 1.5rem; font-weight: 800; color: var(--imigrasi-blue); line-height: 1.2; }
+        .loker-label { font-size: 0.72rem; color: var(--text-blue-grey); text-transform: uppercase; letter-spacing: 0.4px; }
     </style>
 </head>
 <body>
@@ -117,6 +125,15 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>Loker</label>
+                            <select name="loker">
+                                <option value="0" <?= $loker_pilihan == 0 ? 'selected' : '' ?>>Semua Loker</option>
+                                <?php foreach ($loker_list as $l): ?>
+                                    <option value="<?= (int)$l['id'] ?>" <?= $loker_pilihan == (int)$l['id'] ? 'selected' : '' ?>>Loker <?= htmlspecialchars($l['nomor']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <button type="submit" class="btn-cari"><?= icon('search') ?> Terapkan Filter</button>
                     </form>
                 </div>
@@ -137,7 +154,7 @@
                         <div class="stat-sub">Dokumen Diterbitkan</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Penggantian HB</div>
+                        <div class="stat-title">Penggantian Paspor</div>
                         <div class="stat-value"><?= (int)$rekap['total_penggantian'] ?></div>
                         <div class="stat-sub">Dokumen Diterbitkan</div>
                     </div>
@@ -147,6 +164,20 @@
                             <span style="color: var(--imigrasi-blue);">L: <?= (int)$rekap['total_laki'] ?></span> |
                             <span style="color: var(--imigrasi-gold);">P: <?= (int)$rekap['total_perempuan'] ?></span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card-container">
+                    <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><?= icon('archive') ?> Peta Loker</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Klik loker untuk memfilter tabel.</p>
+                    <div class="loker-grid">
+                        <?php foreach ($loker_map as $lm): ?>
+                            <a class="loker-card" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= (int)$lm['id'] ?>">
+                                <div class="loker-nomor">Loker <?= htmlspecialchars($lm['nomor']) ?></div>
+                                <div class="loker-jumlah"><?= (int)$lm['jumlah'] ?></div>
+                                <div class="loker-label">arsip</div>
+                            </a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
@@ -165,6 +196,7 @@
                                     <th style="text-align: center;">GENDER</th>
                                     <th style="text-align: center;">DOKUMEN</th>
                                     <th>STATUS</th>
+                                    <th>LOKASI</th>
                                     <th style="text-align: center; padding-right: 28px;">AKSI</th>
                                 </tr>
                             </thead>
@@ -173,6 +205,12 @@
                                     $tgl_tampil = !empty($row['tgl_lahir']) ? date('d-m-Y', strtotime($row['tgl_lahir'])) : '-';
                                     $tgl_edit = !empty($row['tgl_lahir']) ? $row['tgl_lahir'] : '';
                                     $badge_class = (strpos(strtolower($row['keterangan']), 'baru') !== false) ? 'badge badge-baru' : 'badge badge-ganti';
+                                    $lokasi = '-';
+                                    if ((int)$row['loker_id'] > 0) {
+                                        $lokasi = 'Loker ' . htmlspecialchars($row['loker_nomor'] ?? (string)$row['loker_id']);
+                                        if ($row['rak'] !== '') $lokasi .= ' &middot; Rak ' . htmlspecialchars($row['rak']);
+                                        if ($row['kotak'] !== '') $lokasi .= ' &middot; Kotak ' . htmlspecialchars($row['kotak']);
+                                    }
                                 ?>
                                     <tr>
                                         <td style="padding-left: 28px; color: var(--text-blue-grey); font-weight: 600;"><?= $no++ ?></td>
@@ -181,9 +219,10 @@
                                         <td style="text-align: center;"><span class="badge badge-jk"><?= htmlspecialchars($row['jenis_kelamin']) ?></span></td>
                                         <td style="text-align: center; color: var(--text-blue-grey);"><?= htmlspecialchars($row['dokumen']) ?></td>
                                         <td><span class="<?= $badge_class ?>"><?= htmlspecialchars($row['keterangan']) ?></span></td>
+                                        <td><span class="badge-lokasi"><?= $lokasi ?></span></td>
                                         <td style="padding-right: 28px;">
                                             <div class="action-flex">
-                                                <button onclick="openModalEdit('<?= $row['id'] ?>', '<?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>', '<?= $tgl_edit ?>', '<?= $row['jenis_kelamin'] ?>', '<?= $row['dokumen'] ?>', '<?= $row['keterangan'] ?>', '<?= $row['tanggal_input'] ?>')" class="btn-aksi btn-edit"><?= icon('edit') ?> Edit</button>
+                                                <button onclick="openModalEdit('<?= $row['id'] ?>', '<?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>', '<?= $tgl_edit ?>', '<?= $row['jenis_kelamin'] ?>', '<?= htmlspecialchars($row['dokumen'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['keterangan'], ENT_QUOTES) ?>', '<?= $row['tanggal_input'] ?>', '<?= (int)$row['loker_id'] ?>', '<?= htmlspecialchars($row['rak'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['kotak'], ENT_QUOTES) ?>')" class="btn-aksi btn-edit"><?= icon('edit') ?> Edit</button>
                                                 <form method="POST" action="data_permohonan.php" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip atas nama: <?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>?');">
                                                     <input type="hidden" name="hapus_id" value="<?= $row['id'] ?>">
                                                     <?= Csrf::field() ?>
@@ -194,7 +233,7 @@
                                     </tr>
                                 <?php endforeach; else: ?>
                                     <tr>
-                                        <td colspan="7" style="text-align: center; padding: 60px 20px; color: var(--text-blue-grey);">
+                                        <td colspan="8" style="text-align: center; padding: 60px 20px; color: var(--text-blue-grey);">
                                             <div style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; display: inline-flex;"><?= icon('folder') ?></div>
                                             <br>Belum ada data arsip untuk bulan <?= $nama_bulan[$bulan_pilihan] . ' ' . $tahun_pilihan ?>.
                                         </td>
@@ -209,7 +248,7 @@
                         <div class="pagination-info">Menampilkan <b><?= ($total_semua_data == 0) ? 0 : $halaman_awal + 1 ?></b> - <b><?= min($halaman_awal + $batas_per_halaman, $total_semua_data) ?></b> dari <b><?= $total_semua_data ?></b> pemohon</div>
                         <ul class="pagination-nav">
                             <?php if ($halaman_aktif > 1): ?>
-                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&halaman=<?= $halaman_aktif - 1 ?>">&laquo; Prev</a></li>
+                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $halaman_aktif - 1 ?>">&laquo; Prev</a></li>
                             <?php else: ?>
                                 <li><span class="page-link disabled">&laquo; Prev</span></li>
                             <?php endif; ?>
@@ -217,21 +256,21 @@
                             $start_number = max(1, $halaman_aktif - 2);
                             $end_number = min($total_halaman, $halaman_aktif + 2);
                             if ($start_number > 1) {
-                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&halaman=1">1</a></li>';
+                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&halaman=1">1</a></li>';
                                 if ($start_number > 2) echo '<li><span class="page-link disabled">...</span></li>';
                             }
                             for ($i = $start_number; $i <= $end_number; $i++):
                             ?>
-                                <li><a class="page-link <?= ($halaman_aktif == $i) ? 'active' : '' ?>" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&halaman=<?= $i ?>"><?= $i ?></a></li>
+                                <li><a class="page-link <?= ($halaman_aktif == $i) ? 'active' : '' ?>" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $i ?>"><?= $i ?></a></li>
                             <?php endfor; ?>
                             <?php
                             if ($end_number < $total_halaman) {
                                 if ($end_number < $total_halaman - 1) echo '<li><span class="page-link disabled">...</span></li>';
-                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&halaman='.$total_halaman.'">'.$total_halaman.'</a></li>';
+                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&halaman='.$total_halaman.'">'.$total_halaman.'</a></li>';
                             }
                             ?>
                             <?php if ($halaman_aktif < $total_halaman): ?>
-                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&halaman=<?= $halaman_aktif + 1 ?>">Next &raquo;</a></li>
+                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $halaman_aktif + 1 ?>">Next &raquo;</a></li>
                             <?php else: ?>
                                 <li><span class="page-link disabled">Next &raquo;</span></li>
                             <?php endif; ?>
@@ -270,17 +309,39 @@
                             </select>
                         </div>
                         <div class="form-group-modal">
-                            <label>Jumlah Dokumen</label>
-                            <input type="number" name="dokumen" class="form-control" value="1" min="1" required>
+                            <label>Jenis Dokumen</label>
+                            <select name="dokumen" class="form-control" required>
+                                <option value="" disabled selected>-- Pilih Jenis --</option>
+                                <?php foreach ($dokumen_list as $d): ?>
+                                    <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="form-group-modal">
                             <label>Status Keterangan</label>
                             <select name="keterangan" class="form-control" required>
                                 <option value="" disabled selected>-- Pilih Keterangan --</option>
-                                <option value="Baru">Baru</option>
-                                <option value="Penggantian HB">Penggantian HB</option>
-                                <option value="Perubahan Nama">Perubahan Nama</option>
+                                <?php foreach ($ket_list as $k): ?>
+                                    <option value="<?= htmlspecialchars($k['nama']) ?>"><?= htmlspecialchars($k['nama']) ?></option>
+                                <?php endforeach; ?>
                             </select>
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Lokasi Loker</label>
+                            <select name="loker_id" class="form-control">
+                                <option value="0" selected>-- Belum Ditempatkan --</option>
+                                <?php foreach ($loker_list as $l): ?>
+                                    <option value="<?= (int)$l['id'] ?>">Loker <?= htmlspecialchars($l['nomor']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Rak</label>
+                            <input type="text" name="rak" class="form-control" maxlength="5" placeholder="Contoh: A">
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Kotak</label>
+                            <input type="text" name="kotak" class="form-control" maxlength="20" placeholder="Contoh: 1">
                         </div>
                         <div class="form-group-modal full-width" style="background: rgba(11, 66, 123, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-blue); margin-top: 10px;">
                             <label style="color: var(--imigrasi-blue);">Tanggal Masuk Arsip</label>
@@ -323,16 +384,38 @@
                             </select>
                         </div>
                         <div class="form-group-modal">
-                            <label>Jumlah Dokumen</label>
-                            <input type="number" name="dokumen" id="edit_dokumen" class="form-control" min="1" required>
+                            <label>Jenis Dokumen</label>
+                            <select name="dokumen" id="edit_dokumen" class="form-control" required>
+                                <option value="" disabled>-- Pilih Jenis --</option>
+                                <?php foreach ($dokumen_list as $d): ?>
+                                    <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="form-group-modal">
                             <label>Status Keterangan</label>
                             <select name="keterangan" id="edit_keterangan" class="form-control" required>
-                                <option value="Baru">Baru</option>
-                                <option value="Penggantian HB">Penggantian HB</option>
-                                <option value="Perubahan Nama">Perubahan Nama</option>
+                                <?php foreach ($ket_list as $k): ?>
+                                    <option value="<?= htmlspecialchars($k['nama']) ?>"><?= htmlspecialchars($k['nama']) ?></option>
+                                <?php endforeach; ?>
                             </select>
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Lokasi Loker</label>
+                            <select name="loker_id" id="edit_loker" class="form-control">
+                                <option value="0">-- Belum Ditempatkan --</option>
+                                <?php foreach ($loker_list as $l): ?>
+                                    <option value="<?= (int)$l['id'] ?>">Loker <?= htmlspecialchars($l['nomor']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Rak</label>
+                            <input type="text" name="rak" id="edit_rak" class="form-control" maxlength="5" placeholder="Contoh: A">
+                        </div>
+                        <div class="form-group-modal">
+                            <label>Kotak</label>
+                            <input type="text" name="kotak" id="edit_kotak" class="form-control" maxlength="20" placeholder="Contoh: 1">
                         </div>
                         <div class="form-group-modal full-width" style="background: rgba(245, 166, 35, 0.1); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-gold); margin-top: 10px;">
                             <label style="color: #D48806;">Pindah Bulan Laporan (Tanggal Input)</label>
@@ -356,7 +439,7 @@
         const mEdit = document.getElementById('modalEdit');
         function openModalTambah() { mTambah.classList.add('active'); }
         function closeModalTambah() { mTambah.classList.remove('active'); }
-        function openModalEdit(id, nama, tglLahir, jk, dok, ket, tglInput) {
+        function openModalEdit(id, nama, tglLahir, jk, dok, ket, tglInput, lokerId, rak, kotak) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nama').value = nama;
             document.getElementById('edit_tgl_lahir').value = tglLahir;
@@ -364,6 +447,9 @@
             document.getElementById('edit_dokumen').value = dok;
             document.getElementById('edit_keterangan').value = ket;
             document.getElementById('edit_tgl_input').value = tglInput;
+            document.getElementById('edit_loker').value = lokerId;
+            document.getElementById('edit_rak').value = rak;
+            document.getElementById('edit_kotak').value = kotak;
             mEdit.classList.add('active');
         }
         function closeModalEdit() { mEdit.classList.remove('active'); }

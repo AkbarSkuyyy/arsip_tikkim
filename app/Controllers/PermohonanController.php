@@ -68,6 +68,7 @@ class PermohonanController
         $bulan_pilihan = $_GET['bulan'] ?? date('m');
         $tahun_pilihan = $_GET['tahun'] ?? date('Y');
         $keyword       = isset($_GET['cari']) ? trim($_GET['cari']) : '';
+        $loker_pilihan = (int)($_GET['loker'] ?? 0);
 
         $nama_bulan = [
             '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
@@ -80,11 +81,15 @@ class PermohonanController
         $batas_per_halaman = 15;
         $halaman_aktif = max(1, (int)($_GET['halaman'] ?? 1));
         $halaman_awal = ($halaman_aktif - 1) * $batas_per_halaman;
-        $total_semua_data = (int)($rekap['total_baru_atau_ganti'] ?? Permohonan::searchCount($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan));
-        $total_semua_data = Permohonan::searchCount($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan);
+        $total_semua_data = Permohonan::searchCount($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $loker_pilihan);
         $total_halaman = (int)ceil($total_semua_data / $batas_per_halaman);
 
-        $data_rows = Permohonan::search($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $batas_per_halaman, $halaman_awal);
+        $data_rows = Permohonan::search($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $batas_per_halaman, $halaman_awal, $loker_pilihan);
+
+        $dokumen_list = MasterDokumen::allActive();
+        $ket_list = MasterKeterangan::allActive();
+        $loker_list = MasterLoker::allActive();
+        $loker_map = Permohonan::lokerMap();
 
         require __DIR__ . '/../Views/permohonan/index.php';
     }
@@ -98,6 +103,9 @@ class PermohonanController
             'jenis_kelamin' => ($post['jenis_kelamin'] === 'P') ? 'P' : 'L',
             'keterangan' => trim($post['keterangan']),
             'tanggal_input' => $post['tanggal_input'] ?? date('Y-m-d'),
+            'loker_id' => (int)($post['loker_id'] ?? 0),
+            'rak' => strtoupper(trim($post['rak'] ?? '')),
+            'kotak' => trim($post['kotak'] ?? ''),
         ];
     }
 }
