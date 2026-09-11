@@ -1,0 +1,8 @@
+# Git worktree admin dirs (linked checkouts) — never commit
+.worktrees/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
