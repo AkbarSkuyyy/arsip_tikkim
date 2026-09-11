@@ -42,10 +42,11 @@ class Auth
     }
 
     /**
-     * URL relatif terhadap base path aplikasi (front controller index.php?page=).
+     * URL halaman lama (file stub langsung, misal login.php, dashboard.php).
+     * Dipertahankan agar semua link/bookmark existing tetap berfungsi.
      */
     public static function url(string $page): string
     {
-        return 'index.php?page=' . str_replace('.php', '', $page);
+        return $page;
     }
 }
