@@ -15,18 +15,26 @@ class Permohonan
     public static function create(array $data): bool
     {
         return Database::exec(
-            "INSERT INTO permohonan (nama_pemohon, tgl_lahir, dokumen, jenis_kelamin, keterangan, tanggal_input, loker_id, rak, kotak) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            'ssssssiss',
-            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak']]
+            "INSERT INTO permohonan (nama_pemohon, no_permohonan, tgl_lahir, dokumen, jenis_kelamin, kewarganegaraan, no_paspor_kebangsaan, no_izin_tinggal, masa_berlaku, nama_penjamin, catatan_lain, keterangan, tanggal_input, loker_id, rak, kotak) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            'sssssssssssssiss',
+            [
+                $data['nama_pemohon'], $data['no_permohonan'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'],
+                $data['kewarganegaraan'], $data['no_paspor_kebangsaan'], $data['no_izin_tinggal'], $data['masa_berlaku'], $data['nama_penjamin'], $data['catatan_lain'],
+                $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'],
+            ]
         );
     }
 
     public static function update(int $id, array $data): bool
     {
         return Database::exec(
-            "UPDATE permohonan SET nama_pemohon = ?, tgl_lahir = ?, dokumen = ?, jenis_kelamin = ?, keterangan = ?, tanggal_input = ?, loker_id = ?, rak = ?, kotak = ? WHERE id = ?",
-            'ssssssissi',
-            [$data['nama_pemohon'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'], $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'], $id]
+            "UPDATE permohonan SET nama_pemohon = ?, no_permohonan = ?, tgl_lahir = ?, dokumen = ?, jenis_kelamin = ?, kewarganegaraan = ?, no_paspor_kebangsaan = ?, no_izin_tinggal = ?, masa_berlaku = ?, nama_penjamin = ?, catatan_lain = ?, keterangan = ?, tanggal_input = ?, loker_id = ?, rak = ?, kotak = ? WHERE id = ?",
+            'sssssssssssssissi',
+            [
+                $data['nama_pemohon'], $data['no_permohonan'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'],
+                $data['kewarganegaraan'], $data['no_paspor_kebangsaan'], $data['no_izin_tinggal'], $data['masa_berlaku'], $data['nama_penjamin'], $data['catatan_lain'],
+                $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'], $id,
+            ]
         );
     }
 
@@ -185,6 +193,48 @@ class Permohonan
         unset($row);
 
         return $rows;
+    }
+
+    /**
+     * Auto-assign lokasi fisik (Loker -> Rak -> Kotak) untuk data BARU saja.
+     * Aturan kapasitas: 8 rak per loker (A-H), 100 kotak per rak (1-100).
+     * Urutan pengisian sekuensial: isi Kotak 1..100 di Rak A dulu, baru
+     * pindah ke Rak B, dst; kalau Rak H penuh baru pindah ke Loker berikutnya
+     * (urut nomor loker aktif). Data lama (loker_id=0) TIDAK disentuh/diubah,
+     * hanya dipakai untuk menghitung slot mana yang sudah terisi.
+     *
+     * Return: ['loker_id' => int, 'rak' => string, 'kotak' => string] atau
+     * null jika semua loker aktif penuh (kapasitas habis).
+     */
+    public static function nextLokasiOtomatis(): ?array
+    {
+        $rakPerLoker = 8;   // A..H
+        $kotakPerRak = 100; // 1..100
+        $hurufRak = range('A', chr(ord('A') + $rakPerLoker - 1));
+
+        $lokerAktif = MasterLoker::allActive();
+        if (empty($lokerAktif)) return null;
+
+        // Ambil semua slot terisi (loker_id, rak, kotak numerik) yang sudah dipakai.
+        $r = Database::raw("SELECT loker_id, rak, kotak FROM permohonan WHERE loker_id > 0 AND rak != '' AND kotak != '' AND kotak REGEXP '^[0-9]+$'");
+        $terisi = [];
+        while ($row = mysqli_fetch_assoc($r)) {
+            $terisi[(int)$row['loker_id'] . '|' . strtoupper($row['rak']) . '|' . (int)$row['kotak']] = true;
+        }
+
+        foreach ($lokerAktif as $loker) {
+            $lokerId = (int)$loker['id'];
+            foreach ($hurufRak as $rak) {
+                for ($kotak = 1; $kotak <= $kotakPerRak; $kotak++) {
+                    $key = $lokerId . '|' . $rak . '|' . $kotak;
+                    if (!isset($terisi[$key])) {
+                        return ['loker_id' => $lokerId, 'rak' => $rak, 'kotak' => (string)$kotak];
+                    }
+                }
+            }
+        }
+
+        return null; // Semua loker aktif penuh.
     }
 
     /**

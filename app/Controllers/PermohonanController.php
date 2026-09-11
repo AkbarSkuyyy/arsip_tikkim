@@ -60,13 +60,23 @@ class PermohonanController
         if (isset($_POST['simpan'])) {
             Csrf::verify();
             $data = $this->extractFormData($_POST);
+
+            // Lokasi fisik (Loker -> Rak -> Kotak) diisi OTOMATIS oleh sistem,
+            // urut sesuai slot kosong berikutnya. Tidak menerima input manual.
+            $lokasi = Permohonan::nextLokasiOtomatis();
+            $data['loker_id'] = $lokasi['loker_id'] ?? 0;
+            $data['rak'] = $lokasi['rak'] ?? '';
+            $data['kotak'] = $lokasi['kotak'] ?? '';
+
             if ($data['tgl_lahir'] === null) {
                 Session::flashSet('error', 'Tanggal lahir tidak valid!');
             } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                 Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
+            } elseif ($lokasi === null) {
+                Session::flashSet('error', 'Semua loker arsip sudah penuh! Hubungi admin untuk menambah loker baru.');
             } elseif (Permohonan::create($data)) {
-                catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon']);
-                Session::flashSet('success', 'Data baru berhasil ditambahkan.');
+                catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon'] . " (lokasi otomatis: L{$data['loker_id']}-R{$data['rak']}-K{$data['kotak']})");
+                Session::flashSet('success', 'Data baru berhasil ditambahkan. Lokasi arsip otomatis: Loker ' . $data['loker_id'] . ' · Rak ' . $data['rak'] . ' · Kotak ' . $data['kotak'] . '.');
             } else {
                 Session::flashSet('error', 'Gagal menambahkan data!');
             }
@@ -135,9 +145,16 @@ class PermohonanController
     {
         return [
             'nama_pemohon' => trim($post['nama_pemohon']),
+            'no_permohonan' => trim($post['no_permohonan'] ?? ''),
             'tgl_lahir' => norm_tgl_lahir($post['tgl_lahir'] ?? null),
             'dokumen' => trim($post['dokumen']),
             'jenis_kelamin' => ($post['jenis_kelamin'] === 'P') ? 'P' : 'L',
+            'kewarganegaraan' => trim($post['kewarganegaraan'] ?? ''),
+            'no_paspor_kebangsaan' => trim($post['no_paspor_kebangsaan'] ?? ''),
+            'no_izin_tinggal' => trim($post['no_izin_tinggal'] ?? ''),
+            'masa_berlaku' => norm_tgl_lahir($post['masa_berlaku'] ?? null) ?? null,
+            'nama_penjamin' => trim($post['nama_penjamin'] ?? ''),
+            'catatan_lain' => trim($post['catatan_lain'] ?? ''),
             'keterangan' => trim($post['keterangan']),
             'tanggal_input' => $post['tanggal_input'] ?? date('Y-m-d'),
             'loker_id' => (int)($post['loker_id'] ?? 0),

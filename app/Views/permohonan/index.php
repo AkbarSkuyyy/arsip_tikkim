@@ -80,6 +80,10 @@
         .form-group-modal label { font-size: 0.85rem; color: var(--text-blue-grey); font-weight: 600; text-transform: uppercase;}
         .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.95rem; outline: none; background: var(--bg-main); color: var(--text-dark); font-family: 'Inter', sans-serif; transition: 0.2s;}
         .form-control:focus { border-color: var(--imigrasi-blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(11,66,123,0.1);}
+        .seri-preview { background: rgba(99,102,241,0.06); border: 1px dashed #4F46E5; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: #4F46E5; font-weight: 600; margin-bottom: 15px; min-height: 20px; display: flex; align-items: center; }
+        .seri-preview.is-empty { opacity: 0.35; font-weight: 500; }
+        .field-dinamis { display: none; }
+        .field-dinamis.show { display: flex; }
         .modal-footer { padding: 20px 30px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 15px; background: var(--bg-main); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;}
         .btn-cancel { padding: 10px 24px; background: var(--surface); border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-blue-grey); transition: 0.2s;}
         .btn-cancel:hover { background: #E2E8F0; color: var(--text-dark); }
@@ -324,6 +328,10 @@
                             <input type="text" name="nama_pemohon" class="form-control" required>
                         </div>
                         <div class="form-group-modal">
+                            <label>Nomor Permohonan</label>
+                            <input type="text" name="no_permohonan" class="form-control" maxlength="50" placeholder="Contoh: SPRI-2026-0001">
+                        </div>
+                        <div class="form-group-modal">
                             <label>Tanggal Lahir</label>
                             <input type="date" name="tgl_lahir" class="form-control" required>
                         </div>
@@ -338,10 +346,10 @@
                         <div class="form-group-modal">
                             <label>Jenis Dokumen</label>
                             <?php if ($jenis !== ''): ?>
-                                <input type="hidden" name="dokumen" value="<?= htmlspecialchars($jenis) ?>">
+                                <input type="hidden" name="dokumen" id="tambah_dokumen" value="<?= htmlspecialchars($jenis) ?>">
                                 <div class="form-control" style="background:#EEF2F7; color:var(--text-blue-grey);"><?= htmlspecialchars($jenis) ?> — <?= htmlspecialchars($jenis_nama) ?></div>
                             <?php else: ?>
-                                <select name="dokumen" class="form-control" required>
+                                <select name="dokumen" id="tambah_dokumen" class="form-control" required>
                                     <option value="" disabled selected>-- Pilih Jenis --</option>
                                     <?php foreach ($dokumen_list as $d): ?>
                                         <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
@@ -358,24 +366,39 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group-modal">
-                            <label>Lokasi Loker</label>
-                            <select name="loker_id" class="form-control">
-                                <option value="0" selected>-- Belum Ditempatkan --</option>
-                                <?php foreach ($loker_list as $l): ?>
-                                    <option value="<?= (int)$l['id'] ?>">Loker <?= htmlspecialchars($l['nomor']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
+
+                        <!-- Field khusus Izin Tinggal (WNA): tampil otomatis berdasarkan jenis dokumen -->
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>Kewarganegaraan</label>
+                            <input type="text" name="kewarganegaraan" class="form-control" placeholder="Contoh: Malaysia">
                         </div>
-                        <div class="form-group-modal">
-                            <label>Rak</label>
-                            <input type="text" name="rak" class="form-control" maxlength="5" placeholder="Contoh: A">
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>No. Paspor Kebangsaan</label>
+                            <input type="text" name="no_paspor_kebangsaan" class="form-control" maxlength="30" placeholder="Nomor paspor asing">
                         </div>
-                        <div class="form-group-modal">
-                            <label>Kotak</label>
-                            <input type="text" name="kotak" class="form-control" maxlength="20" placeholder="Contoh: 1">
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>No. Izin Tinggal (KITAS/KITAP)</label>
+                            <input type="text" name="no_izin_tinggal" class="form-control" maxlength="30">
                         </div>
-                        <div class="form-group-modal full-width" id="seri-preview-tambah" style="background: rgba(99,102,241,0.06); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; color: #4F46E5; font-weight: 600; display:none;"></div>
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>Masa Berlaku Izin Tinggal</label>
+                            <input type="date" name="masa_berlaku" class="form-control">
+                        </div>
+                        <div class="form-group-modal field-dinamis full-width" data-untuk="13">
+                            <label>Nama Penjamin / Sponsor</label>
+                            <input type="text" name="nama_penjamin" class="form-control" maxlength="100">
+                        </div>
+
+                        <!-- Field khusus jenis dokumen "Lainnya": catatan bebas -->
+                        <div class="form-group-modal field-dinamis full-width" data-untuk="16">
+                            <label>Catatan / Keterangan Tambahan</label>
+                            <input type="text" name="catatan_lain" class="form-control" maxlength="255" placeholder="Jelaskan jenis dokumen/keperluan lainnya">
+                        </div>
+
+                        <div class="form-group-modal full-width" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                            <?= icon('archive') ?>
+                            <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">Lokasi arsip (Loker · Rak · Kotak) diisi <u>otomatis</u> oleh sistem sesuai slot kosong berikutnya — tidak perlu dipilih manual.</span>
+                        </div>
                         <div class="form-group-modal full-width" style="background: rgba(11, 66, 123, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-blue); margin-top: 10px;">
                             <label style="color: var(--imigrasi-blue);">Tanggal Masuk Arsip</label>
                             <input type="date" name="tanggal_input" class="form-control" value="<?= date('Y-m-d') ?>" required>
@@ -476,30 +499,22 @@
     <script>
         const mTambah = document.getElementById('modalTambah');
         const mEdit = document.getElementById('modalEdit');
-        function openModalTambah() { mTambah.classList.add('active'); }
+        function openModalTambah() { mTambah.classList.add('active'); toggleFieldDinamis(); }
         function closeModalTambah() { mTambah.classList.remove('active'); }
+        function toggleFieldDinamis() {
+            const dokSel = document.getElementById('tambah_dokumen');
+            const kodeAktif = dokSel ? dokSel.value : '';
+            document.querySelectorAll('#modalTambah .field-dinamis').forEach(function (el) {
+                const untuk = (el.getAttribute('data-untuk') || '').split(',');
+                const cocok = untuk.includes(kodeAktif);
+                el.classList.toggle('show', cocok);
+                el.querySelectorAll('input, select').forEach(function (f) { f.disabled = !cocok; });
+            });
+        }
         (function () {
-            const lokerSel = document.querySelector('#modalTambah select[name="loker_id"]');
-            const rakInput = document.querySelector('#modalTambah input[name="rak"]');
-            const kotakInput = document.querySelector('#modalTambah input[name="kotak"]');
-            const preview = document.getElementById('seri-preview-tambah');
-            function updateSeri() {
-                if (!lokerSel || !preview) return;
-                const opt = lokerSel.options[lokerSel.selectedIndex];
-                const lokerLabel = opt ? opt.textContent.trim().replace('Loker ', 'L') : '';
-                const rak = (rakInput.value || '').trim();
-                const kotak = (kotakInput.value || '').trim();
-                if (lokerSel.value === '0' || !lokerLabel) { preview.style.display = 'none'; return; }
-                let kode = lokerLabel;
-                if (rak) kode += '-R' + rak;
-                if (kotak) kode += '-K' + kotak;
-                preview.textContent = 'Kode seri lokasi: ' + kode;
-                preview.style.display = 'block';
-            }
-            if (lokerSel) {
-                lokerSel.addEventListener('change', updateSeri);
-                rakInput.addEventListener('input', updateSeri);
-                kotakInput.addEventListener('input', updateSeri);
+            const dokSel = document.getElementById('tambah_dokumen');
+            if (dokSel && dokSel.tagName === 'SELECT') {
+                dokSel.addEventListener('change', toggleFieldDinamis);
             }
         })();
         function openModalEdit(id, nama, tglLahir, jk, dok, ket, tglInput, lokerId, rak, kotak) {
