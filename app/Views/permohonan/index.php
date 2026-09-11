@@ -253,7 +253,25 @@
                                         <td><span class="badge-lokasi"><?= $lokasi ?></span></td>
                                         <td style="padding-right: 28px;">
                                             <div class="action-flex">
-                                                <button onclick="openModalEdit('<?= $row['id'] ?>', '<?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>', '<?= $tgl_edit ?>', '<?= $row['jenis_kelamin'] ?>', '<?= htmlspecialchars($row['dokumen'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['keterangan'], ENT_QUOTES) ?>', '<?= $row['tanggal_input'] ?>', '<?= (int)$row['loker_id'] ?>', '<?= htmlspecialchars($row['rak'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['kotak'], ENT_QUOTES) ?>')" class="btn-aksi btn-edit"><?= icon('edit') ?> Edit</button>
+                                                <button onclick="openModalEdit('<?= htmlspecialchars(json_encode([
+                                                    'id' => $row['id'],
+                                                    'nama_pemohon' => $row['nama_pemohon'],
+                                                    'no_permohonan' => $row['no_permohonan'] ?? '',
+                                                    'tgl_lahir' => $tgl_edit,
+                                                    'jenis_kelamin' => $row['jenis_kelamin'],
+                                                    'dokumen' => $row['dokumen'],
+                                                    'keterangan' => $row['keterangan'],
+                                                    'tanggal_input' => $row['tanggal_input'],
+                                                    'loker_id' => (int)$row['loker_id'],
+                                                    'rak' => $row['rak'],
+                                                    'kotak' => $row['kotak'],
+                                                    'kewarganegaraan' => $row['kewarganegaraan'] ?? '',
+                                                    'no_paspor_kebangsaan' => $row['no_paspor_kebangsaan'] ?? '',
+                                                    'no_izin_tinggal' => $row['no_izin_tinggal'] ?? '',
+                                                    'masa_berlaku' => $row['masa_berlaku'] ?? '',
+                                                    'nama_penjamin' => $row['nama_penjamin'] ?? '',
+                                                    'catatan_lain' => $row['catatan_lain'] ?? '',
+                                                ]), ENT_QUOTES) ?>')" class="btn-aksi btn-edit"><?= icon('edit') ?> Edit</button>
                                                 <form method="POST" action="data_permohonan.php" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip atas nama: <?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>?');">
                                                     <input type="hidden" name="hapus_id" value="<?= $row['id'] ?>">
                                                     <?= Csrf::field() ?>
@@ -429,6 +447,10 @@
                             <input type="text" name="nama_pemohon" id="edit_nama" class="form-control" required>
                         </div>
                         <div class="form-group-modal">
+                            <label>Nomor Permohonan</label>
+                            <input type="text" name="no_permohonan" id="edit_no_permohonan" class="form-control" maxlength="50" placeholder="Contoh: SPRI-2026-0001">
+                        </div>
+                        <div class="form-group-modal">
                             <label>Tanggal Lahir</label>
                             <input type="date" name="tgl_lahir" id="edit_tgl_lahir" class="form-control" required>
                         </div>
@@ -461,6 +483,35 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <!-- Field khusus Izin Tinggal (WNA): tampil otomatis berdasarkan jenis dokumen -->
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>Kewarganegaraan</label>
+                            <input type="text" name="kewarganegaraan" id="edit_kewarganegaraan" class="form-control" placeholder="Contoh: Malaysia">
+                        </div>
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>No. Paspor Kebangsaan</label>
+                            <input type="text" name="no_paspor_kebangsaan" id="edit_no_paspor_kebangsaan" class="form-control" maxlength="30" placeholder="Nomor paspor asing">
+                        </div>
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>No. Izin Tinggal (KITAS/KITAP)</label>
+                            <input type="text" name="no_izin_tinggal" id="edit_no_izin_tinggal" class="form-control" maxlength="30">
+                        </div>
+                        <div class="form-group-modal field-dinamis" data-untuk="13">
+                            <label>Masa Berlaku Izin Tinggal</label>
+                            <input type="date" name="masa_berlaku" id="edit_masa_berlaku" class="form-control">
+                        </div>
+                        <div class="form-group-modal field-dinamis full-width" data-untuk="13">
+                            <label>Nama Penjamin / Sponsor</label>
+                            <input type="text" name="nama_penjamin" id="edit_nama_penjamin" class="form-control" maxlength="100">
+                        </div>
+
+                        <!-- Field khusus jenis dokumen "Lainnya": catatan bebas -->
+                        <div class="form-group-modal field-dinamis full-width" data-untuk="16">
+                            <label>Catatan / Keterangan Tambahan</label>
+                            <input type="text" name="catatan_lain" id="edit_catatan_lain" class="form-control" maxlength="255" placeholder="Jelaskan jenis dokumen/keperluan lainnya">
+                        </div>
+
                         <div class="form-group-modal">
                             <label>Lokasi Loker</label>
                             <select name="loker_id" id="edit_loker" class="form-control">
@@ -499,12 +550,12 @@
     <script>
         const mTambah = document.getElementById('modalTambah');
         const mEdit = document.getElementById('modalEdit');
-        function openModalTambah() { mTambah.classList.add('active'); toggleFieldDinamis(); }
+        function openModalTambah() { mTambah.classList.add('active'); toggleFieldDinamis('modalTambah', 'tambah_dokumen'); }
         function closeModalTambah() { mTambah.classList.remove('active'); }
-        function toggleFieldDinamis() {
-            const dokSel = document.getElementById('tambah_dokumen');
+        function toggleFieldDinamis(modalId, selectId) {
+            const dokSel = document.getElementById(selectId);
             const kodeAktif = dokSel ? dokSel.value : '';
-            document.querySelectorAll('#modalTambah .field-dinamis').forEach(function (el) {
+            document.querySelectorAll('#' + modalId + ' .field-dinamis').forEach(function (el) {
                 const untuk = (el.getAttribute('data-untuk') || '').split(',');
                 const cocok = untuk.includes(kodeAktif);
                 el.classList.toggle('show', cocok);
@@ -514,20 +565,35 @@
         (function () {
             const dokSel = document.getElementById('tambah_dokumen');
             if (dokSel && dokSel.tagName === 'SELECT') {
-                dokSel.addEventListener('change', toggleFieldDinamis);
+                dokSel.addEventListener('change', function () { toggleFieldDinamis('modalTambah', 'tambah_dokumen'); });
             }
         })();
-        function openModalEdit(id, nama, tglLahir, jk, dok, ket, tglInput, lokerId, rak, kotak) {
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_nama').value = nama;
-            document.getElementById('edit_tgl_lahir').value = tglLahir;
-            document.getElementById('edit_jk').value = jk;
-            document.getElementById('edit_dokumen').value = dok;
-            document.getElementById('edit_keterangan').value = ket;
-            document.getElementById('edit_tgl_input').value = tglInput;
-            document.getElementById('edit_loker').value = lokerId;
-            document.getElementById('edit_rak').value = rak;
-            document.getElementById('edit_kotak').value = kotak;
+        (function () {
+            const dokSel = document.getElementById('edit_dokumen');
+            if (dokSel && dokSel.tagName === 'SELECT') {
+                dokSel.addEventListener('change', function () { toggleFieldDinamis('modalEdit', 'edit_dokumen'); });
+            }
+        })();
+        function openModalEdit(dataJson) {
+            const d = JSON.parse(dataJson);
+            document.getElementById('edit_id').value = d.id;
+            document.getElementById('edit_nama').value = d.nama_pemohon;
+            document.getElementById('edit_no_permohonan').value = d.no_permohonan;
+            document.getElementById('edit_tgl_lahir').value = d.tgl_lahir;
+            document.getElementById('edit_jk').value = d.jenis_kelamin;
+            document.getElementById('edit_dokumen').value = d.dokumen;
+            document.getElementById('edit_keterangan').value = d.keterangan;
+            document.getElementById('edit_tgl_input').value = d.tanggal_input;
+            document.getElementById('edit_loker').value = d.loker_id;
+            document.getElementById('edit_rak').value = d.rak;
+            document.getElementById('edit_kotak').value = d.kotak;
+            document.getElementById('edit_kewarganegaraan').value = d.kewarganegaraan;
+            document.getElementById('edit_no_paspor_kebangsaan').value = d.no_paspor_kebangsaan;
+            document.getElementById('edit_no_izin_tinggal').value = d.no_izin_tinggal;
+            document.getElementById('edit_masa_berlaku').value = d.masa_berlaku;
+            document.getElementById('edit_nama_penjamin').value = d.nama_penjamin;
+            document.getElementById('edit_catatan_lain').value = d.catatan_lain;
+            toggleFieldDinamis('modalEdit', 'edit_dokumen');
             mEdit.classList.add('active');
         }
         function closeModalEdit() { mEdit.classList.remove('active'); }

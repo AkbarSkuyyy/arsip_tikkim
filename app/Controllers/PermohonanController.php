@@ -72,6 +72,8 @@ class PermohonanController
                 Session::flashSet('error', 'Tanggal lahir tidak valid!');
             } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                 Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
+            } elseif ($data['dokumen'] === '13' && $data['masa_berlaku'] === null) {
+                Session::flashSet('error', 'Masa berlaku izin tinggal wajib diisi untuk jenis dokumen Izin Tinggal!');
             } elseif ($lokasi === null) {
                 Session::flashSet('error', 'Semua loker arsip sudah penuh! Hubungi admin untuk menambah loker baru.');
             } elseif (Permohonan::create($data)) {
@@ -94,6 +96,8 @@ class PermohonanController
                     Session::flashSet('error', 'Tanggal lahir tidak valid!');
                 } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                     Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
+                } elseif ($data['dokumen'] === '13' && $data['masa_berlaku'] === null) {
+                    Session::flashSet('error', 'Masa berlaku izin tinggal wajib diisi untuk jenis dokumen Izin Tinggal!');
                 } elseif (Permohonan::update($id_edit, $data)) {
                     catatLog(Auth::userNama(), "Mengubah data permohonan: " . $data['nama_pemohon']);
                     Session::flashSet('success', 'Data permohonan telah diperbarui.');
@@ -144,22 +148,22 @@ class PermohonanController
     private function extractFormData(array $post): array
     {
         return [
-            'nama_pemohon' => trim($post['nama_pemohon']),
-            'no_permohonan' => trim($post['no_permohonan'] ?? ''),
+            'nama_pemohon' => trim((string)($post['nama_pemohon'] ?? '')),
+            'no_permohonan' => trim((string)($post['no_permohonan'] ?? '')),
             'tgl_lahir' => norm_tgl_lahir($post['tgl_lahir'] ?? null),
-            'dokumen' => trim($post['dokumen']),
-            'jenis_kelamin' => ($post['jenis_kelamin'] === 'P') ? 'P' : 'L',
-            'kewarganegaraan' => trim($post['kewarganegaraan'] ?? ''),
-            'no_paspor_kebangsaan' => trim($post['no_paspor_kebangsaan'] ?? ''),
-            'no_izin_tinggal' => trim($post['no_izin_tinggal'] ?? ''),
+            'dokumen' => trim((string)($post['dokumen'] ?? '')),
+            'jenis_kelamin' => (($post['jenis_kelamin'] ?? '') === 'P') ? 'P' : 'L',
+            'kewarganegaraan' => trim((string)($post['kewarganegaraan'] ?? '')),
+            'no_paspor_kebangsaan' => trim((string)($post['no_paspor_kebangsaan'] ?? '')),
+            'no_izin_tinggal' => trim((string)($post['no_izin_tinggal'] ?? '')),
             'masa_berlaku' => norm_tgl_lahir($post['masa_berlaku'] ?? null) ?? null,
-            'nama_penjamin' => trim($post['nama_penjamin'] ?? ''),
-            'catatan_lain' => trim($post['catatan_lain'] ?? ''),
-            'keterangan' => trim($post['keterangan']),
+            'nama_penjamin' => trim((string)($post['nama_penjamin'] ?? '')),
+            'catatan_lain' => trim((string)($post['catatan_lain'] ?? '')),
+            'keterangan' => trim((string)($post['keterangan'] ?? '')),
             'tanggal_input' => $post['tanggal_input'] ?? date('Y-m-d'),
             'loker_id' => (int)($post['loker_id'] ?? 0),
-            'rak' => strtoupper(trim($post['rak'] ?? '')),
-            'kotak' => trim($post['kotak'] ?? ''),
+            'rak' => strtoupper(trim((string)($post['rak'] ?? ''))),
+            'kotak' => trim((string)($post['kotak'] ?? '')),
         ];
     }
 }
