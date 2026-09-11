@@ -138,7 +138,9 @@ class Permohonan
     /**
      * Peta loker: total arsip per loker aktif (semua periode) untuk grid
      * "Peta Loker" di data_permohonan.php. $kodeFilter = daftar kode dokumen
-     * yang boleh diakses (kosong = semua).
+     * yang boleh diakses (kosong = semua). Setiap loker menyertakan daftar
+     * nomor series (Loker-Rak-Kotak) rak/kotak yang sudah terisi, agar
+     * gampang dicari & tercatat rapi di peta.
      */
     public static function lokerMap(array $kodeFilter = []): array
     {
@@ -158,6 +160,30 @@ class Permohonan
         $r = Database::query($sql, $types, $params);
         $rows = [];
         while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
+
+        // Lampirkan daftar seri Rak-Kotak terisi per loker (maks 6 contoh ditampilkan di UI).
+        foreach ($rows as &$row) {
+            $sql2 = "SELECT DISTINCT rak, kotak FROM permohonan WHERE loker_id = ? AND (rak != '' OR kotak != '')";
+            $types2 = 'i';
+            $params2 = [(int)$row['id']];
+            if (!empty($kodeFilter)) {
+                $sql2 .= " AND dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+                $types2 .= str_repeat('s', count($kodeFilter));
+                foreach ($kodeFilter as $k) $params2[] = $k;
+            }
+            $sql2 .= " ORDER BY rak ASC, kotak ASC";
+            $r2 = Database::query($sql2, $types2, $params2);
+            $seri = [];
+            while ($row2 = mysqli_fetch_assoc($r2)) {
+                $kode = 'L' . $row['nomor'];
+                if ($row2['rak'] !== '') $kode .= '-R' . $row2['rak'];
+                if ($row2['kotak'] !== '') $kode .= '-K' . $row2['kotak'];
+                $seri[] = $kode;
+            }
+            $row['seri'] = $seri;
+        }
+        unset($row);
+
         return $rows;
     }
 

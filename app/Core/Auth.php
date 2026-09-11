@@ -44,6 +44,7 @@ class Auth
     /**
      * Daftar kode jenis dokumen yang boleh diakses user saat ini.
      * '*' (admin / akses penuh) -> semua kode aktif dari master_dokumen.
+     * User biasa dibatasi tepat SATU jenis dokumen (diatur oleh superadmin).
      */
     public static function aksesDokumen(): array
     {
@@ -53,6 +54,17 @@ class Auth
         }
         $kode = array_filter(array_map('trim', explode(',', $akses)), 'strlen');
         return array_values(array_unique($kode));
+    }
+
+    /**
+     * Kode jenis dokumen tunggal milik user biasa, atau '' jika admin/belum diset.
+     */
+    public static function aksesDokumenTunggal(): string
+    {
+        $akses = (string)Session::get('user_akses', '*');
+        if ($akses === '' || $akses === '*') return '';
+        $kode = array_filter(array_map('trim', explode(',', $akses)), 'strlen');
+        return $kode ? (string)reset($kode) : '';
     }
 
     /**

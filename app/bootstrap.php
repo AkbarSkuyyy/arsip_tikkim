@@ -5,6 +5,8 @@
  * (dipertahankan sementara untuk kompatibilitas selama migrasi).
  */
 
+date_default_timezone_set('Asia/Jakarta');
+
 spl_autoload_register(function (string $class) {
     $dirs = [
         __DIR__ . '/Core/',

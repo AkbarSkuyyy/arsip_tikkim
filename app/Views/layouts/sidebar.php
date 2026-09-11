@@ -70,11 +70,15 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 </a>
             </li>
             <?php
-            $menu_dok = Auth::isAdmin() ? MasterDokumen::allActive() : [];
-            if (!Auth::isAdmin()) {
-                $akses = Auth::aksesDokumen();
-                foreach (MasterDokumen::allActive() as $md) {
-                    if (in_array($md['kode'], $akses, true)) $menu_dok[] = $md;
+            $menu_dok = [];
+            if (Auth::isAdmin()) {
+                $menu_dok = MasterDokumen::allActive();
+            } else {
+                $kode_tunggal = Auth::aksesDokumenTunggal();
+                if ($kode_tunggal !== '') {
+                    foreach (MasterDokumen::allActive() as $md) {
+                        if ($md['kode'] === $kode_tunggal) { $menu_dok[] = $md; break; }
+                    }
                 }
             }
             foreach ($menu_dok as $md):

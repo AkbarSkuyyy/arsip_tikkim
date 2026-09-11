@@ -1,7 +1,7 @@
 <?php
 /**
- * View: edit role + akses dokumen user. Variabel dari UserController::edit():
- * $user, $dokumen_list, $akses_sekarang
+ * View: edit role + jenis dokumen yang dikelola user. Variabel dari
+ * UserController::edit(): $user, $dokumen_list, $akses_sekarang, $error
  */
 ?>
 <!DOCTYPE html>
@@ -26,6 +26,9 @@
         .akses-list { border: 1px solid #CBD5E1; border-radius: 8px; padding: 12px; max-height: 220px; overflow-y: auto; background: #F8FAFC; }
         .akses-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-weight: 500; cursor: pointer; font-size: 0.9rem; }
         .akses-item input { cursor: pointer; }
+        .akses-hint { font-size: 0.8rem; color: #64748B; margin-top: 8px; margin-bottom: 0; }
+        .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 500; }
+        .alert-error { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
     </style>
 </head>
 <body>
@@ -33,7 +36,12 @@
     <main class="main-content">
         <div class="container">
             <div class="card">
-                <h2 style="margin-bottom: 24px;">Edit Role &amp; Akses Pengguna</h2>
+                <h2 style="margin-bottom: 24px;">Edit Role &amp; Jenis Dokumen</h2>
+
+                <?php if ($error !== ""): ?>
+                    <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
+
                 <form method="POST">
                     <?= Csrf::field() ?>
                     <div class="form-group">
@@ -52,15 +60,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Akses Jenis Dokumen</label>
+                        <label>Jenis Dokumen yang Dikelola</label>
                         <div id="akses-group" class="akses-list">
                             <?php foreach ($dokumen_list as $d): ?>
                             <label class="akses-item">
-                                <input type="checkbox" name="akses_dokumen[]" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb" <?= in_array($d['kode'], $akses_sekarang, true) ? 'checked' : '' ?>>
+                                <input type="radio" name="akses_dokumen" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb" <?= $akses_sekarang === $d['kode'] ? 'checked' : '' ?> required>
                                 <span><?= htmlspecialchars($d['kode']) ?> — <?= htmlspecialchars($d['nama']) ?></span>
                             </label>
                             <?php endforeach; ?>
-                            <p style="font-size:0.8rem; color:#64748B; margin-top:8px; margin-bottom:0;">Admin otomatis mendapat akses ke semua jenis dokumen.</p>
+                            <p class="akses-hint">User biasa hanya mengelola SATU jenis dokumen permohonan. Admin otomatis mendapat akses ke semua jenis dokumen.</p>
                         </div>
                     </div>
                     <div class="btn-group">
@@ -76,7 +84,7 @@
         const aksesGroup = document.getElementById('akses-group');
         function syncAkses() {
             const isAdmin = roleSel.value === 'admin';
-            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; });
+            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; cb.required = !isAdmin; });
             aksesGroup.style.opacity = isAdmin ? '0.5' : '1';
         }
         roleSel.addEventListener('change', syncAkses);

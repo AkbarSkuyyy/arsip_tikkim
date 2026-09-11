@@ -13,11 +13,11 @@ class RealtimeController
     {
         Auth::requireLogin();
 
-        $is_full = Auth::isAdmin() || (Session::get('user_akses', '*') === '*');
+        $is_full = Auth::isAdmin();
         $kode_filter = [];
         if (!$is_full) {
-            $kode_filter = Auth::aksesDokumen();
-            if (empty($kode_filter)) $kode_filter = ['__none__'];
+            $kode_tunggal = Auth::aksesDokumenTunggal();
+            $kode_filter = $kode_tunggal !== '' ? [$kode_tunggal] : ['__none__'];
         }
 
         // Modul jenis dokumen tertentu (?jenis=) — wajib punya akses.

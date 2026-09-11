@@ -93,6 +93,9 @@
         .loker-nomor { font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); }
         .loker-jumlah { font-size: 1.5rem; font-weight: 800; color: var(--imigrasi-blue); line-height: 1.2; }
         .loker-label { font-size: 0.72rem; color: var(--text-blue-grey); text-transform: uppercase; letter-spacing: 0.4px; }
+        .loker-seri { margin-top: 6px; font-size: 0.65rem; color: var(--text-blue-grey); line-height: 1.5; word-break: break-word; }
+        .loker-seri span { display: inline-block; background: rgba(11,66,123,0.06); border-radius: 4px; padding: 1px 5px; margin: 1px; font-weight: 600; }
+        .loker-seri-more { color: var(--imigrasi-gold); font-weight: 700; }
         .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
         .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
         @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -183,13 +186,23 @@
 
                 <div class="card-container">
                     <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><?= icon('archive') ?> Peta Loker</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Klik loker untuk memfilter tabel.</p>
+                    <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Kode seri = Loker-Rak-Kotak (mis. L1-RA-K3). Klik loker untuk memfilter tabel.</p>
                     <div class="loker-grid">
                         <?php foreach ($loker_map as $lm): ?>
                             <a class="loker-card" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= (int)$lm['id'] ?>&jenis=<?= urlencode($jenis) ?>">
                                 <div class="loker-nomor">Loker <?= htmlspecialchars($lm['nomor']) ?></div>
                                 <div class="loker-jumlah" data-rt="loker" data-rt-id="<?= (int)$lm['id'] ?>"><?= (int)$lm['jumlah'] ?></div>
                                 <div class="loker-label">arsip</div>
+                                <?php $seri = $lm['seri'] ?? []; if (!empty($seri)): ?>
+                                <div class="loker-seri" title="<?= htmlspecialchars(implode(', ', $seri)) ?>">
+                                    <?php foreach (array_slice($seri, 0, 4) as $s): ?>
+                                        <span><?= htmlspecialchars($s) ?></span>
+                                    <?php endforeach; ?>
+                                    <?php if (count($seri) > 4): ?>
+                                        <span class="loker-seri-more">+<?= count($seri) - 4 ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -362,6 +375,7 @@
                             <label>Kotak</label>
                             <input type="text" name="kotak" class="form-control" maxlength="20" placeholder="Contoh: 1">
                         </div>
+                        <div class="form-group-modal full-width" id="seri-preview-tambah" style="background: rgba(99,102,241,0.06); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; color: #4F46E5; font-weight: 600; display:none;"></div>
                         <div class="form-group-modal full-width" style="background: rgba(11, 66, 123, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-blue); margin-top: 10px;">
                             <label style="color: var(--imigrasi-blue);">Tanggal Masuk Arsip</label>
                             <input type="date" name="tanggal_input" class="form-control" value="<?= date('Y-m-d') ?>" required>
@@ -464,6 +478,30 @@
         const mEdit = document.getElementById('modalEdit');
         function openModalTambah() { mTambah.classList.add('active'); }
         function closeModalTambah() { mTambah.classList.remove('active'); }
+        (function () {
+            const lokerSel = document.querySelector('#modalTambah select[name="loker_id"]');
+            const rakInput = document.querySelector('#modalTambah input[name="rak"]');
+            const kotakInput = document.querySelector('#modalTambah input[name="kotak"]');
+            const preview = document.getElementById('seri-preview-tambah');
+            function updateSeri() {
+                if (!lokerSel || !preview) return;
+                const opt = lokerSel.options[lokerSel.selectedIndex];
+                const lokerLabel = opt ? opt.textContent.trim().replace('Loker ', 'L') : '';
+                const rak = (rakInput.value || '').trim();
+                const kotak = (kotakInput.value || '').trim();
+                if (lokerSel.value === '0' || !lokerLabel) { preview.style.display = 'none'; return; }
+                let kode = lokerLabel;
+                if (rak) kode += '-R' + rak;
+                if (kotak) kode += '-K' + kotak;
+                preview.textContent = 'Kode seri lokasi: ' + kode;
+                preview.style.display = 'block';
+            }
+            if (lokerSel) {
+                lokerSel.addEventListener('change', updateSeri);
+                rakInput.addEventListener('input', updateSeri);
+                kotakInput.addEventListener('input', updateSeri);
+            }
+        })();
         function openModalEdit(id, nama, tglLahir, jk, dok, ket, tglInput, lokerId, rak, kotak) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nama').value = nama;

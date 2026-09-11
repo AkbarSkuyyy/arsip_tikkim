@@ -1,6 +1,9 @@
 <?php
 /**
  * Controller: manajemen akun pengguna (register, edit role+akses, reset password, hapus).
+ * User biasa hanya boleh mengelola SATU jenis dokumen permohonan; hal ini
+ * diatur oleh superadmin lewat form tambah/edit akun (radio pilihan, bukan
+ * multi-select). Admin selalu punya akses ke semua jenis ('*').
  */
 class UserController
 {
@@ -32,16 +35,17 @@ class UserController
             $role     = ($_POST['role'] === 'admin') ? 'admin' : 'user';
             $password = $_POST['password'];
 
-            // Akses jenis dokumen: admin = semua ('*'); user = pilihan checkbox.
+            // Akses jenis dokumen: admin = semua ('*'); user = tepat SATU jenis dokumen.
             if ($role === 'admin') {
                 $akses_dokumen = '*';
             } else {
-                $sel = $_POST['akses_dokumen'] ?? [];
-                $akses_dokumen = is_array($sel) ? implode(',', array_filter(array_map('trim', $sel), 'strlen')) : '';
+                $akses_dokumen = trim((string)($_POST['akses_dokumen'] ?? ''));
             }
 
             if (strlen($password) < 8) {
                 $pesan_error = "Kata sandi minimal 8 karakter!";
+            } elseif ($role === 'user' && $akses_dokumen === '') {
+                $pesan_error = "Pilih satu jenis dokumen untuk akun ini!";
             } elseif (User::existsByEmailOrUsername($email, $username)) {
                 $pesan_error = "Email atau Username tersebut sudah terdaftar!";
             } else {
@@ -68,8 +72,10 @@ class UserController
 
         $dokumen_list = MasterDokumen::allActive();
         $akses_sekarang = ($user['akses_dokumen'] ?? '*') === '*'
-            ? []
-            : array_filter(array_map('trim', explode(',', (string)($user['akses_dokumen'] ?? ''))), 'strlen');
+            ? ''
+            : trim(explode(',', (string)($user['akses_dokumen'] ?? ''))[0] ?? '');
+
+        $error = "";
 
         if (isset($_POST['update_role'])) {
             Csrf::verify();
@@ -77,13 +83,18 @@ class UserController
             if ($role === 'admin') {
                 $akses_dokumen = '*';
             } else {
-                $sel = $_POST['akses_dokumen'] ?? [];
-                $akses_dokumen = is_array($sel) ? implode(',', array_filter(array_map('trim', $sel), 'strlen')) : '';
+                $akses_dokumen = trim((string)($_POST['akses_dokumen'] ?? ''));
             }
-            Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
-            catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
-            header("Location: kelola_akun.php");
-            exit;
+
+            if ($role === 'user' && $akses_dokumen === '') {
+                $error = "Pilih satu jenis dokumen untuk akun ini!";
+                $akses_sekarang = $akses_dokumen;
+            } else {
+                Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
+                catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
+                header("Location: kelola_akun.php");
+                exit;
+            }
         }
 
         require __DIR__ . '/../Views/users/edit.php';

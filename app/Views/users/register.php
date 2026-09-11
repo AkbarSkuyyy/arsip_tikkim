@@ -34,6 +34,7 @@
         .akses-list { border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; max-height: 220px; overflow-y: auto; background: #F8FAFC; }
         .akses-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-weight: 500; cursor: pointer; font-size: 0.9rem; }
         .akses-item input { cursor: pointer; }
+        .akses-hint { font-size: 0.8rem; color: var(--text-blue-grey); margin-top: 8px; margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -81,15 +82,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Akses Jenis Dokumen</label>
+                        <label>Jenis Dokumen yang Dikelola</label>
                         <div id="akses-group" class="akses-list">
-                            <?php foreach ($dokumen_list as $d): ?>
+                            <?php foreach ($dokumen_list as $i => $d): ?>
                             <label class="akses-item">
-                                <input type="checkbox" name="akses_dokumen[]" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb">
+                                <input type="radio" name="akses_dokumen" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb" <?= $i === 0 ? 'checked' : '' ?> required>
                                 <span><?= htmlspecialchars($d['kode']) ?> — <?= htmlspecialchars($d['nama']) ?></span>
                             </label>
                             <?php endforeach; ?>
-                            <p style="font-size:0.8rem; color:var(--text-blue-grey); margin-top:8px; margin-bottom:0;">Admin otomatis mendapat akses ke semua jenis dokumen.</p>
+                            <p class="akses-hint">User biasa hanya mengelola SATU jenis dokumen permohonan. Admin otomatis mendapat akses ke semua jenis dokumen.</p>
                         </div>
                     </div>
                     <div class="btn-group">
@@ -105,7 +106,7 @@
         const aksesGroup = document.getElementById('akses-group');
         function syncAkses() {
             const isAdmin = roleSel.value === 'admin';
-            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; });
+            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; cb.required = !isAdmin; });
             aksesGroup.style.opacity = isAdmin ? '0.5' : '1';
         }
         roleSel.addEventListener('change', syncAkses);
