@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Sistem - Arsip SPRI</title>
+    <title>Login Sistem - SI RAPI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="asset/css/common.css">
     <style>
@@ -61,8 +61,8 @@
             <div class="logo-box">
                 <img src="asset/img/logo.png" alt="Logo Imigrasi">
             </div>
-            <h1 class="brand-main">Sistem Arsip TIKKIM</h1>
-            <span class="brand-sub">Imigrasi Kelas II TPI Sampit</span>
+            <h1 class="brand-main">SI RAPI</h1>
+            <span class="brand-sub">Sistem Aplikasi Rekam Arsip Permohonan Imigrasi</span>
         </div>
 
         <div class="login-body">

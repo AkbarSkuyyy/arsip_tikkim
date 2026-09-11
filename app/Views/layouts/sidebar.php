@@ -52,8 +52,8 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             </div>
         </div>
         <div class="brand-title">
-            <span class="brand-main">Arsip TIKKIM</span>
-            <span class="brand-sub">Imigrasi Kelas II TPI Sampit</span>
+            <span class="brand-main">SI RAPI</span>
+            <span class="brand-sub">Imigrasi Kelas II TPI Kotawaringin Timur</span>
         </div>
     </div>
     

@@ -26,7 +26,7 @@ class BackupController
         $result = mysqli_query($conn, 'SHOW TABLES');
         while ($row = mysqli_fetch_row($result)) { $tables[] = $row[0]; }
 
-        $return = "-- Backup Database Arsip SPRI\n-- Tanggal: " . date('Y-m-d H:i:s') . "\n\n";
+        $return = "-- Backup Database SI RAPI\n-- Tanggal: " . date('Y-m-d H:i:s') . "\n\n";
 
         foreach ($tables as $table) {
             $result = mysqli_query($conn, 'SELECT * FROM ' . $table);

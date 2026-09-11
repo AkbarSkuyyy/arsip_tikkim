@@ -8,7 +8,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Pengguna - Arsip SPRI</title>
+    <title>Edit Pengguna - SI RAPI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="asset/css/common.css">
     <style>

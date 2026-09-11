@@ -51,7 +51,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
             <img src="asset/img/logo.png" alt="Logo Imigrasi">
         </div>
         <div class="brand-title">
-            <span class="brand-main">Arsip TIKKIM</span>
+            <span class="brand-main">SI RAPI</span>
             <span class="brand-sub">Super Admin Panel</span>
         </div>
     </div>
