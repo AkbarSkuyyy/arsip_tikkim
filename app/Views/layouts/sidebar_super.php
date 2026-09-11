@@ -11,8 +11,8 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
 
 <style>
     /* CSS Sidebar Super Admin — tema gelap ungu-emas, beda dari sidebar staf */
-    .sidebar-super { width: 280px; background-color: #1E1B3A; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.15); z-index: 10; }
-    .sidebar-super-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-super { width: 280px; background-color: #1E1B3A; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.15); z-index: 10; overflow: hidden; }
+    .sidebar-super-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
 
     .logo-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
     .logo-box img { width: 100%; height: 100%; object-fit: contain; }
@@ -21,9 +21,9 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .brand-main { font-size: 1.15rem; font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif; }
     .brand-sub { font-size: 0.72rem; color: #F5A623; text-transform: uppercase; margin-top: 3px; font-weight: 700; letter-spacing: 0.5px; }
 
-    .super-mode-badge { margin: 16px 24px 0; padding: 8px 14px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: #F5A623; text-transform: uppercase; letter-spacing: 0.5px; }
+    .super-mode-badge { margin: 16px 24px 0; padding: 8px 14px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: #F5A623; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
 
-    .sidebar-super-nav { flex: 1; padding: 20px 16px; }
+    .sidebar-super-nav { flex: 1; padding: 20px 16px; overflow-y: auto; min-height: 0; }
     .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
     .nav-section-label { font-size: 0.7rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; padding: 16px 18px 6px; }
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
@@ -32,11 +32,11 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
     .nav-subitem .icon svg { width: 14px; height: 14px; }
 
-    .sidebar-super-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-super-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .user-avatar { width: 36px; height: 36px; background: rgba(245,166,35,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
     .btn-logout { color: #EF4444; background: rgba(239, 68, 68, 0.12); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; }
     .btn-logout:hover { background: #EF4444; color: white; }
-    .btn-back-staff { display: flex; align-items: center; gap: 10px; margin: 0 16px 16px; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 10px; color: #D1D5DB; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
+    .btn-back-staff { display: flex; align-items: center; gap: 10px; margin: 0 16px 16px; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 10px; color: #D1D5DB; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.2s; flex-shrink: 0; }
     .btn-back-staff:hover { background: rgba(255,255,255,0.1); color: #fff; }
 </style>
 
