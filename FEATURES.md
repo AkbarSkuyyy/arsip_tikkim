@@ -2,6 +2,11 @@
 
 Prioritas berdasar dampak vs usaha, dan risiko teknis yang sudah ditemukan di kode.
 
+> **Status terbaru:** mayoritas rekomendasi prioritas sudah direalisasikan —
+> prepared statements, CSRF, migrasi `tgl_lahir DATE`, konsolidasi MVC,
+> toast, SVG, ekstrak CSS, master dokumen/keterangan/loker, rate limiting,
+> backup+restore, dan **lokasi fisik arsip (loker → rak → kotak)**.
+
 ---
 
 ## 1. Rekomendasi Prioritas (Urut Dikerjakan)
@@ -39,13 +44,21 @@ Prioritas berdasar dampak vs usaha, dan risiko teknis yang sudah ditemukan di ko
 - Ringkasan tahunan (total per tahun).
 
 ### 2.4 Master Data
-- Tabel master **jenis dokumen** (relasi ke `permohonan.dokumen`).
-- Tabel master **keterangan** (Baru / Penggantian Paspor / lainnya) supaya tidak teks bebas.
+- Tabel master **jenis dokumen** — ✅ sudah (`master_dokumen`).
+- Tabel master **keterangan** (Baru / Penggantian Paspor / Perubahan Nama / Penambahan Nama) — ✅ sudah (`master_keterangan`).
+- Tabel master **loker** (11 loker fisik) — ✅ sudah (`master_loker`).
 
 ### 2.5 Keamanan & Akun
 - Rate limiting login (cegah brute force).
 - Role granular (admin seksi vs operator vs viewer).
 - Enforce password min 8 char + `password_hash` (sudah ada, perlu enforce di form).
+
+### 2.6 Lokasi Fisik Arsip (Loker → Rak → Kotak) — ✅ sudah
+- `master_loker` (11 loker) + kolom `loker_id`, `rak`, `kotak` di `permohonan`.
+- Form tambah/edit: pilih Loker, isi Rak & Kotak.
+- Tabel list: kolom LOKASI (`Loker 7 · Rak A · Kotak 3`).
+- Filter Loker + Peta Loker (grid 11 kartu, jumlah arsip per loker).
+- Fase berikutnya (opsional): label QR/barcode per kotak → scan buka record.
 
 ---
 

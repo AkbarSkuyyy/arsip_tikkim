@@ -59,8 +59,9 @@ dan **Penggantian Paspor**.
 
 - Autentikasi & otorisasi (role admin/user).
 - CRUD data permohonan SPRI.
-- Filter bulan/tahun, pencarian nama, pagination.
+- Filter bulan/tahun/loker, pencarian nama, pagination.
 - Rekap otomatis (total, Baru, Penggantian, L/P).
+- Lokasi fisik arsip (loker → rak → kotak) + peta loker.
 - Import CSV & export Excel.
 - Laporan periode (rentang tanggal) siap cetak.
 - Pengaturan identitas instansi (kop laporan).
@@ -100,13 +101,14 @@ dan **Penggantian Paspor**.
 
 ### FR-4 Data Permohonan
 
-- **FR-4.1** Tambah data (popup): nama, tanggal lahir, dokumen, jenis kelamin, keterangan, tanggal input.
+- **FR-4.1** Tambah data (popup): nama, tanggal lahir, jenis dokumen, jenis kelamin, keterangan, tanggal input, lokasi (loker, rak, kotak).
 - **FR-4.2** Edit data (popup), hanya 1 ID valid.
 - **FR-4.3** Hapus data dengan konfirmasi.
-- **FR-4.4** Filter bulan + tahun.
+- **FR-4.4** Filter bulan + tahun + loker.
 - **FR-4.5** Pencarian nama (`LIKE`).
 - **FR-4.6** Pagination 15 baris/halaman.
 - **FR-4.7** Rekap bulanan ringkas (total, baru, penggantian, L/P).
+- **FR-4.8** Kolom LOKASI di tabel + Peta Loker (grid 11 loker, jumlah arsip per loker).
 
 ### FR-5 Import Arsip (CSV)
 
@@ -157,7 +159,10 @@ dan **Penggantian Paspor**.
 | Tabel            | Kolom Kunci                                                  |
 | ---------------- | ------------------------------------------------------------ |
 | `users`          | id, nama, username, jabatan, email, password (hash), role, foto_profile |
-| `permohonan`     | id, nama_pemohon, tahun/bulan/tanggal_lahir, dokumen, jenis_kelamin, keterangan, tanggal_input |
+| `permohonan`     | id, nama_pemohon, tgl_lahir (DATE), dokumen, jenis_kelamin, keterangan, tanggal_input, loker_id, rak, kotak |
+| `master_loker`   | id, nomor, nama, aktif (11 loker fisik)                      |
+| `master_dokumen` | id, kode, nama, aktif (jenis dokumen)                        |
+| `master_keterangan` | id, nama, aktif (Baru / Penggantian Paspor / dll)         |
 | `permohonan_spri`| id, no_urut, nama_pemohon (template 12 bulan)                |
 | `pengaturan`     | id, kementerian, instansi, seksi, pejabat_nama/jabatan/nip   |
 | `logs`           | id, user, aksi, waktu                                        |
@@ -197,6 +202,7 @@ dan **Penggantian Paspor**.
 | M3        | Dashboard + kelola user + pengaturan                   |
 | M4        | Hardening: PDO/prepared, CSRF, validasi, toast, SVG    |
 | M5        | Refactor MVC + deploy cPanel                           |
+| M6        | Lokasi fisik arsip (loker → rak → kotak) + peta loker  |
 
 ---
 
