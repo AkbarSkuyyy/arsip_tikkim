@@ -58,10 +58,26 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 </a>
             </li>
             <li>
-                <a href="data_permohonan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php') ? 'active' : ''; ?>">
+                <a href="data_permohonan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && empty($GLOBALS['current_jenis'])) ? 'active' : ''; ?>">
                     <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
+            <?php
+            $menu_dok = Auth::isAdmin() ? MasterDokumen::allActive() : [];
+            if (!Auth::isAdmin()) {
+                $akses = Auth::aksesDokumen();
+                foreach (MasterDokumen::allActive() as $md) {
+                    if (in_array($md['kode'], $akses, true)) $menu_dok[] = $md;
+                }
+            }
+            foreach ($menu_dok as $md):
+            ?>
+            <li>
+                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : ''; ?>" style="padding-left: 34px;">
+                    <?= icon('file') ?> <?= htmlspecialchars($md['nama']) ?>
+                </a>
+            </li>
+            <?php endforeach; ?>
             <li>
                 <a href="import_arsip.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : ''; ?>">
                     <?= icon('import') ?> Import Arsip Excel

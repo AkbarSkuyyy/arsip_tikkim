@@ -1,6 +1,8 @@
 <?php
 /**
- * Controller: CRUD data permohonan (arsip SPRI) dengan filter bulan/tahun/keyword + pagination.
+ * Controller: CRUD data permohonan (arsip) dengan filter bulan/tahun/keyword/jenis + pagination.
+ * Akses tiap jenis dokumen dibatasi role/akses user (admin melihat semua). Modul per jenis
+ * dokumen diakses lewat ?jenis=<kode>.
  */
 class PermohonanController
 {
@@ -8,22 +10,49 @@ class PermohonanController
     {
         Auth::requireLogin();
 
+        $is_full = Auth::isAdmin() || (Session::get('user_akses', '*') === '*');
+
+        $dokumen_list = MasterDokumen::allActive();
+        $dok_by_kode = [];
+        foreach ($dokumen_list as $d) $dok_by_kode[$d['kode']] = $d['nama'];
+
+        // Resolusi jenis dokumen (?jenis=) + filter akses untuk staf.
+        $jenis = isset($_GET['jenis']) ? trim((string)$_GET['jenis']) : '';
+        $jenis_nama = '';
+        $kode_filter = [];
+
+        if ($jenis !== '') {
+            if (!isset($dok_by_kode[$jenis])) {
+                header("Location: data_permohonan.php");
+                exit;
+            }
+            Auth::requireAksesDokumen($jenis);
+            $jenis_nama = $dok_by_kode[$jenis];
+            $kode_filter = [$jenis];
+        } elseif (!$is_full) {
+            $kode_filter = Auth::aksesDokumen();
+            if (empty($kode_filter)) $kode_filter = ['__none__'];
+        }
+
         // 1. HAPUS
         if (isset($_POST['hapus_id'])) {
             Csrf::verify();
             $id_hapus = (int)$_POST['hapus_id'];
             if ($id_hapus > 0) {
                 $d = Permohonan::find($id_hapus);
-                $nama = $d['nama_pemohon'] ?? ('ID ' . $id_hapus);
-
-                if (Permohonan::delete($id_hapus)) {
-                    catatLog(Auth::userNama(), "Menghapus data permohonan: " . $nama);
-                    Session::flashSet('success', 'Data permohonan telah dihapus.');
+                if ($d && !Auth::canAksesDokumen($d['dokumen'])) {
+                    Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
                 } else {
-                    Session::flashSet('error', 'Gagal menghapus data!');
+                    $nama = $d['nama_pemohon'] ?? ('ID ' . $id_hapus);
+                    if (Permohonan::delete($id_hapus)) {
+                        catatLog(Auth::userNama(), "Menghapus data permohonan: " . $nama);
+                        Session::flashSet('success', 'Data permohonan telah dihapus.');
+                    } else {
+                        Session::flashSet('error', 'Gagal menghapus data!');
+                    }
                 }
             }
-            header("Location: data_permohonan.php");
+            header("Location: data_permohonan.php" . ($jenis !== '' ? "?jenis=" . urlencode($jenis) : ""));
             exit;
         }
 
@@ -31,16 +60,17 @@ class PermohonanController
         if (isset($_POST['simpan'])) {
             Csrf::verify();
             $data = $this->extractFormData($_POST);
-
             if ($data['tgl_lahir'] === null) {
                 Session::flashSet('error', 'Tanggal lahir tidak valid!');
+            } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
+                Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
             } elseif (Permohonan::create($data)) {
                 catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon']);
                 Session::flashSet('success', 'Data baru berhasil ditambahkan.');
             } else {
                 Session::flashSet('error', 'Gagal menambahkan data!');
             }
-            header("Location: data_permohonan.php");
+            header("Location: data_permohonan.php" . ($jenis !== '' ? "?jenis=" . urlencode($jenis) : ""));
             exit;
         }
 
@@ -50,9 +80,10 @@ class PermohonanController
             $id_edit = (int)$_POST['id_permohonan'];
             if ($id_edit > 0) {
                 $data = $this->extractFormData($_POST);
-
                 if ($data['tgl_lahir'] === null) {
                     Session::flashSet('error', 'Tanggal lahir tidak valid!');
+                } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
+                    Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
                 } elseif (Permohonan::update($id_edit, $data)) {
                     catatLog(Auth::userNama(), "Mengubah data permohonan: " . $data['nama_pemohon']);
                     Session::flashSet('success', 'Data permohonan telah diperbarui.');
@@ -60,7 +91,7 @@ class PermohonanController
                     Session::flashSet('error', 'Gagal memperbarui data!');
                 }
             }
-            header("Location: data_permohonan.php");
+            header("Location: data_permohonan.php" . ($jenis !== '' ? "?jenis=" . urlencode($jenis) : ""));
             exit;
         }
 
@@ -76,20 +107,26 @@ class PermohonanController
             '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
         ];
 
-        $rekap = Permohonan::rekapBulan((int)$bulan_pilihan, (int)$tahun_pilihan);
+        $rekap = Permohonan::rekapBulan((int)$bulan_pilihan, (int)$tahun_pilihan, $kode_filter);
 
         $batas_per_halaman = 15;
         $halaman_aktif = max(1, (int)($_GET['halaman'] ?? 1));
         $halaman_awal = ($halaman_aktif - 1) * $batas_per_halaman;
-        $total_semua_data = Permohonan::searchCount($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $loker_pilihan);
+        $total_semua_data = Permohonan::searchCount($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $loker_pilihan, $kode_filter);
         $total_halaman = (int)ceil($total_semua_data / $batas_per_halaman);
 
-        $data_rows = Permohonan::search($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $batas_per_halaman, $halaman_awal, $loker_pilihan);
+        $data_rows = Permohonan::search($keyword, (int)$bulan_pilihan, (int)$tahun_pilihan, $batas_per_halaman, $halaman_awal, $loker_pilihan, $kode_filter);
 
-        $dokumen_list = MasterDokumen::allActive();
+        // Dropdown jenis dokumen pada form: penuh untuk admin, terbatas untuk staf.
+        if (!$is_full && $jenis === '' && !empty($kode_filter) && $kode_filter !== ['__none__']) {
+            $dokumen_list = array_values(array_filter($dokumen_list, function ($d) use ($kode_filter) {
+                return in_array($d['kode'], $kode_filter, true);
+            }));
+        }
+
         $ket_list = MasterKeterangan::allActive();
         $loker_list = MasterLoker::allActive();
-        $loker_map = Permohonan::lokerMap();
+        $loker_map = Permohonan::lokerMap($kode_filter);
 
         require __DIR__ . '/../Views/permohonan/index.php';
     }

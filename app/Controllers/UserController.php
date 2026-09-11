@@ -1,6 +1,6 @@
 <?php
 /**
- * Controller: manajemen akun pengguna (register, edit role, reset password, hapus).
+ * Controller: manajemen akun pengguna (register, edit role+akses, reset password, hapus).
  */
 class UserController
 {
@@ -10,6 +10,7 @@ class UserController
 
         $pesan_sukses = "";
         $pesan_error = "";
+        $dokumen_list = MasterDokumen::allActive();
 
         if (isset($_POST['register'])) {
             Csrf::verify();
@@ -21,14 +22,22 @@ class UserController
             $role     = ($_POST['role'] === 'admin') ? 'admin' : 'user';
             $password = $_POST['password'];
 
+            // Akses jenis dokumen: admin = semua ('*'); user = pilihan checkbox.
+            if ($role === 'admin') {
+                $akses_dokumen = '*';
+            } else {
+                $sel = $_POST['akses_dokumen'] ?? [];
+                $akses_dokumen = is_array($sel) ? implode(',', array_filter(array_map('trim', $sel), 'strlen')) : '';
+            }
+
             if (strlen($password) < 8) {
                 $pesan_error = "Kata sandi minimal 8 karakter!";
             } elseif (User::existsByEmailOrUsername($email, $username)) {
                 $pesan_error = "Email atau Username tersebut sudah terdaftar!";
             } else {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
-                if (User::create(['nama' => $nama, 'username' => $username, 'jabatan' => $jabatan, 'email' => $email, 'password' => $hashed, 'role' => $role])) {
-                    catatLog(Auth::userNama(), "Menambah akun baru: $username (role: $role)");
+                if (User::create(['nama' => $nama, 'username' => $username, 'jabatan' => $jabatan, 'email' => $email, 'password' => $hashed, 'role' => $role, 'akses_dokumen' => $akses_dokumen])) {
+                    catatLog(Auth::userNama(), "Menambah akun baru: $username (role: $role, akses: $akses_dokumen)");
                     $pesan_sukses = "Akun berhasil dibuat dengan role: $role.";
                 } else {
                     $pesan_error = "Terjadi kesalahan saat menyimpan akun.";
@@ -47,11 +56,22 @@ class UserController
         $user = User::find($id);
         if (!$user) { header("Location: dashboard_super.php"); exit; }
 
+        $dokumen_list = MasterDokumen::allActive();
+        $akses_sekarang = ($user['akses_dokumen'] ?? '*') === '*'
+            ? []
+            : array_filter(array_map('trim', explode(',', (string)($user['akses_dokumen'] ?? ''))), 'strlen');
+
         if (isset($_POST['update_role'])) {
             Csrf::verify();
             $role = ($_POST['role'] === 'admin') ? 'admin' : 'user';
-            Database::exec("UPDATE users SET role = ? WHERE id = ?", 'si', [$role, $id]);
-            catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role);
+            if ($role === 'admin') {
+                $akses_dokumen = '*';
+            } else {
+                $sel = $_POST['akses_dokumen'] ?? [];
+                $akses_dokumen = is_array($sel) ? implode(',', array_filter(array_map('trim', $sel), 'strlen')) : '';
+            }
+            Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
+            catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
             header("Location: dashboard_super.php");
             exit;
         }

@@ -24,3 +24,4 @@ Router::get('audit_trail', 'AuditTrailController', 'index');
 
 Router::get('backup', 'BackupController', 'download');
 Router::get('backup_restore', 'BackupController', 'restoreForm');
+Router::get('realtime', 'RealtimeController', 'index');

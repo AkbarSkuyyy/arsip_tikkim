@@ -53,6 +53,9 @@
         .badge { background-color: rgba(11, 66, 123, 0.1); color: var(--imigrasi-blue); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
         .badge-baru { background-color: rgba(16, 185, 129, 0.1); color: #059669; }
         .badge-ganti { background-color: rgba(245, 166, 35, 0.1); color: #D48806; }
+        .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
+        @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -60,21 +63,21 @@
         <?php include __DIR__ . '/../layouts/nav.php'; ?>
         <main class="main-content">
             <header class="top-header">
-                <h1 class="page-title">Dashboard Analitik SPRI</h1>
+                <h1 class="page-title">Dashboard Analitik SPRI <span class="live-badge">Live · <span data-rt-time>--:--:--</span></span></h1>
             </header>
             <div class="content-wrapper">
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-title">Total Keseluruhan</div>
-                        <div class="stat-value"><?= (int)$total_data ?></div>
+                        <div class="stat-value" data-rt="total"><?= (int)$total_data ?></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Permohonan Baru</div>
-                        <div class="stat-value"><?= (int)$total_baru ?></div>
+                        <div class="stat-value" data-rt="baru"><?= (int)$total_baru ?></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Penggantian HB</div>
-                        <div class="stat-value"><?= (int)$total_ganti ?></div>
+                        <div class="stat-title">Penggantian Paspor</div>
+                        <div class="stat-value" data-rt="ganti"><?= (int)$total_ganti ?></div>
                     </div>
                 </div>
 
@@ -142,7 +145,7 @@
 
         new Chart(document.getElementById('chartStatus').getContext('2d'), {
             type: 'bar',
-            data: { labels: ['Permohonan Baru', 'Penggantian HB'], datasets: [{ label: 'Jumlah SPRI', data: [dataBaru, dataGanti], backgroundColor: barColors, borderRadius: 8, borderWidth: 0, barThickness: 60 }] },
+            data: { labels: ['Permohonan Baru', 'Penggantian Paspor'], datasets: [{ label: 'Jumlah SPRI', data: [dataBaru, dataGanti], backgroundColor: barColors, borderRadius: 8, borderWidth: 0, barThickness: 60 }] },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
@@ -168,5 +171,6 @@
             }
         });
     </script>
+    <script src="asset/js/realtime.js"></script>
 </body>
 </html>

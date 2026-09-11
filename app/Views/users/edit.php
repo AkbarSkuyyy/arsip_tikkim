@@ -1,6 +1,7 @@
 <?php
 /**
- * View: edit role user. Variabel dari UserController::edit(): $user
+ * View: edit role + akses dokumen user. Variabel dari UserController::edit():
+ * $user, $dokumen_list, $akses_sekarang
  */
 ?>
 <!DOCTYPE html>
@@ -22,6 +23,9 @@
         .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; text-align: center; flex: 1; }
         .btn-primary { background: #0B427B; color: #fff; }
         .btn-cancel { background: #E2E8F0; color: #475569; }
+        .akses-list { border: 1px solid #CBD5E1; border-radius: 8px; padding: 12px; max-height: 220px; overflow-y: auto; background: #F8FAFC; }
+        .akses-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-weight: 500; cursor: pointer; font-size: 0.9rem; }
+        .akses-item input { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -29,7 +33,7 @@
     <main class="main-content">
         <div class="container">
             <div class="card">
-                <h2 style="margin-bottom: 24px;">Edit Role Pengguna</h2>
+                <h2 style="margin-bottom: 24px;">Edit Role &amp; Akses Pengguna</h2>
                 <form method="POST">
                     <?= Csrf::field() ?>
                     <div class="form-group">
@@ -47,6 +51,18 @@
                             <option value="admin" <?= $user['role'] == 'admin' ? 'selected' : '' ?>>Admin (Super Admin)</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Akses Jenis Dokumen</label>
+                        <div id="akses-group" class="akses-list">
+                            <?php foreach ($dokumen_list as $d): ?>
+                            <label class="akses-item">
+                                <input type="checkbox" name="akses_dokumen[]" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb" <?= in_array($d['kode'], $akses_sekarang, true) ? 'checked' : '' ?>>
+                                <span><?= htmlspecialchars($d['kode']) ?> — <?= htmlspecialchars($d['nama']) ?></span>
+                            </label>
+                            <?php endforeach; ?>
+                            <p style="font-size:0.8rem; color:#64748B; margin-top:8px; margin-bottom:0;">Admin otomatis mendapat akses ke semua jenis dokumen.</p>
+                        </div>
+                    </div>
                     <div class="btn-group">
                         <a href="dashboard_super.php" class="btn btn-cancel">Batal</a>
                         <button type="submit" name="update_role" class="btn btn-primary">Simpan Perubahan</button>
@@ -55,5 +71,16 @@
             </div>
         </div>
     </main>
+    <script>
+        const roleSel = document.querySelector('select[name="role"]');
+        const aksesGroup = document.getElementById('akses-group');
+        function syncAkses() {
+            const isAdmin = roleSel.value === 'admin';
+            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; });
+            aksesGroup.style.opacity = isAdmin ? '0.5' : '1';
+        }
+        roleSel.addEventListener('change', syncAkses);
+        syncAkses();
+    </script>
 </body>
 </html>

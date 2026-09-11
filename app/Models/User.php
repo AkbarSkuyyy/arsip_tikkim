@@ -38,18 +38,18 @@ class User
     public static function create(array $data): bool
     {
         return Database::exec(
-            "INSERT INTO users (nama, username, jabatan, email, password, role) VALUES (?, ?, ?, ?, ?, ?)",
-            'ssssss',
-            [$data['nama'], $data['username'], $data['jabatan'], $data['email'], $data['password'], $data['role']]
+            "INSERT INTO users (nama, username, jabatan, email, password, role, akses_dokumen) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            'sssssss',
+            [$data['nama'], $data['username'], $data['jabatan'], $data['email'], $data['password'], $data['role'], $data['akses_dokumen']]
         );
     }
 
     public static function update(int $id, array $data): bool
     {
         return Database::exec(
-            "UPDATE users SET nama = ?, username = ?, jabatan = ?, email = ?, role = ? WHERE id = ?",
-            'sssssi',
-            [$data['nama'], $data['username'], $data['jabatan'], $data['email'], $data['role'], $id]
+            "UPDATE users SET nama = ?, username = ?, jabatan = ?, email = ?, role = ?, akses_dokumen = ? WHERE id = ?",
+            'ssssssi',
+            [$data['nama'], $data['username'], $data['jabatan'], $data['email'], $data['role'], $data['akses_dokumen'], $id]
         );
     }
 

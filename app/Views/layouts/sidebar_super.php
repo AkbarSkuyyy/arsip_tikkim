@@ -68,10 +68,17 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
                 </a>
             </li>
             <li>
-                <a href="data_permohonan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'data_permohonan.php') ? 'active' : '' ?>">
+                <a href="data_permohonan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'data_permohonan.php' && empty($GLOBALS['current_jenis'])) ? 'active' : '' ?>">
                     <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
+            <?php foreach (MasterDokumen::allActive() as $md): ?>
+            <li>
+                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item <?= ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : '' ?>" style="padding-left: 34px;">
+                    <?= icon('file') ?> <?= htmlspecialchars($md['nama']) ?>
+                </a>
+            </li>
+            <?php endforeach; ?>
             <li>
                 <a href="laporan.php" class="nav-item <?= ($GLOBALS['current_page'] == 'laporan.php') ? 'active' : '' ?>">
                     <?= icon('report') ?> Laporan Bulanan

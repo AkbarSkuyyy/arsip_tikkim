@@ -3,7 +3,7 @@
  * View: dashboard super admin. Variabel dari DashboardSuperController::index():
  * $total_data, $total_hari_ini, $total_bulan_ini, $total_users, $total_admin,
  * $dok_labels, $dok_data, $ket_labels, $ket_data, $tren_labels, $tren_data,
- * $log_labels, $log_data, $users, $logs, $db_size_mb, $total_logs
+ * $log_labels, $log_data, $users, $dokumen_list, $logs, $db_size_mb, $total_logs
  */
 ?>
 <!DOCTYPE html>
@@ -58,40 +58,44 @@
         .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
         .role-admin { background: rgba(245,166,35,0.15); color: #D48806; }
         .role-user { background: rgba(11,66,123,0.1); color: var(--imigrasi-blue); }
+        .akses-chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(99,102,241,0.12); color: #4F46E5; margin: 1px; }
         .sys-info-list { display: flex; flex-direction: column; gap: 14px; }
         .sys-info-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
         .sys-info-item:last-child { border-bottom: none; padding-bottom: 0; }
         .sys-info-label { font-size: 0.85rem; color: var(--text-blue-grey); font-weight: 500; }
         .sys-info-value { font-size: 0.9rem; font-weight: 700; color: var(--imigrasi-dark); }
+        .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
+        @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
     <?php include __DIR__ . '/../layouts/nav.php'; ?>
     <main class="main-content">
         <header class="top-header">
-            <h1 class="page-title"><?= icon('crown') ?> Dashboard Super Admin</h1>
+            <h1 class="page-title"><?= icon('crown') ?> Dashboard Super Admin <span class="live-badge">Live · <span data-rt-time>--:--:--</span></span></h1>
         </header>
         <div class="content-wrapper">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-title">Total Permohonan</div>
-                    <div class="stat-value"><?= (int)$total_data ?></div>
+                    <div class="stat-value" data-rt="total"><?= (int)$total_data ?></div>
                 </div>
                 <div class="stat-card c-green">
                     <div class="stat-title">Input Hari Ini</div>
-                    <div class="stat-value"><?= (int)$total_hari_ini ?></div>
+                    <div class="stat-value" data-rt="today"><?= (int)$total_hari_ini ?></div>
                 </div>
                 <div class="stat-card c-gold">
                     <div class="stat-title">Input Bulan Ini</div>
-                    <div class="stat-value"><?= (int)$total_bulan_ini ?></div>
+                    <div class="stat-value" data-rt="bulan_ini"><?= (int)$total_bulan_ini ?></div>
                 </div>
                 <div class="stat-card c-purple">
                     <div class="stat-title">Total Pengguna</div>
-                    <div class="stat-value"><?= (int)$total_users ?></div>
+                    <div class="stat-value" data-rt="users"><?= (int)$total_users ?></div>
                 </div>
                 <div class="stat-card c-red">
                     <div class="stat-title">Akun Admin</div>
-                    <div class="stat-value"><?= (int)$total_admin ?></div>
+                    <div class="stat-value" data-rt="admin"><?= (int)$total_admin ?></div>
                 </div>
             </div>
 
@@ -160,8 +164,9 @@
                             <a href="register.php" class="btn-add"><?= icon('users') ?> Tambah Akun</a>
                         </div>
                     </div>
+                    <?php $dok_map = []; foreach ($dokumen_list as $d) $dok_map[$d['kode']] = $d['nama']; ?>
                     <table>
-                        <thead><tr><th>NAMA</th><th>USERNAME</th><th>JABATAN</th><th>ROLE</th><th>AKSI</th></tr></thead>
+                        <thead><tr><th>NAMA</th><th>USERNAME</th><th>JABATAN</th><th>ROLE</th><th>AKSES DOKUMEN</th><th>AKSI</th></tr></thead>
                         <tbody>
                             <?php foreach ($users as $usr): ?>
                             <tr>
@@ -169,6 +174,20 @@
                                 <td><?= htmlspecialchars($usr['username']) ?></td>
                                 <td><?= htmlspecialchars($usr['jabatan']) ?></td>
                                 <td><span class="role-badge <?= $usr['role'] === 'admin' ? 'role-admin' : 'role-user' ?>"><?= htmlspecialchars($usr['role']) ?></span></td>
+                                <td>
+                                    <?php if (($usr['akses_dokumen'] ?? '*') === '*'): ?>
+                                        <span class="akses-chip" style="background: rgba(245,166,35,0.15); color:#D48806;">Semua</span>
+                                    <?php else: ?>
+                                        <?php $akses_arr = array_filter(array_map('trim', explode(',', (string)($usr['akses_dokumen'] ?? ''))), 'strlen'); ?>
+                                        <?php if (empty($akses_arr)): ?>
+                                            <span class="akses-chip">-</span>
+                                        <?php else: ?>
+                                            <?php foreach ($akses_arr as $k): ?>
+                                                <span class="akses-chip"><?= htmlspecialchars($dok_map[$k] ?? $k) ?></span>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit">Edit</a>
                                     <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset">Reset Pass</a>
@@ -240,5 +259,6 @@
             }
         });
     </script>
+    <script src="asset/js/realtime.js"></script>
 </body>
 </html>

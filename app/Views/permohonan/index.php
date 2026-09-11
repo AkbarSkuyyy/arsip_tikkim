@@ -4,7 +4,7 @@
  * Variabel dari PermohonanController::index(): $bulan_pilihan, $tahun_pilihan, $keyword,
  * $loker_pilihan, $nama_bulan, $rekap, $batas_per_halaman, $halaman_aktif, $halaman_awal,
  * $total_semua_data, $total_halaman, $data_rows, $dokumen_list, $ket_list,
- * $loker_list, $loker_map
+ * $loker_list, $loker_map, $jenis, $jenis_nama, $is_full
  */
 ?>
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Permohonan - Arsip SPRI</title>
+    <title><?= $jenis_nama !== '' ? htmlspecialchars($jenis_nama) : 'Data Permohonan' ?> - Arsip SPRI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="asset/css/common.css">
     <style>
@@ -93,6 +93,9 @@
         .loker-nomor { font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); }
         .loker-jumlah { font-size: 1.5rem; font-weight: 800; color: var(--imigrasi-blue); line-height: 1.2; }
         .loker-label { font-size: 0.72rem; color: var(--text-blue-grey); text-transform: uppercase; letter-spacing: 0.4px; }
+        .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
+        @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -100,7 +103,7 @@
         <?php include __DIR__ . '/../layouts/nav.php'; ?>
         <div class="content">
             <header class="top-header">
-                <h1 class="page-title">Kelola Arsip Permohonan</h1>
+                <h1 class="page-title"><?= $jenis_nama !== '' ? 'Kelola Arsip ' . htmlspecialchars($jenis_nama) : 'Kelola Arsip Permohonan' ?> <span class="live-badge">Live · <span data-rt-time>--:--:--</span></span></h1>
             </header>
             <div class="content-wrapper">
                 <div class="card-container">
@@ -134,6 +137,17 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <?php if ($is_full): ?>
+                        <div class="form-group">
+                            <label>Jenis Dokumen</label>
+                            <select name="jenis">
+                                <option value="" <?= $jenis === '' ? 'selected' : '' ?>>Semua Jenis</option>
+                                <?php foreach ($dokumen_list as $d): ?>
+                                    <option value="<?= htmlspecialchars($d['kode']) ?>" <?= $jenis === $d['kode'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php endif; ?>
                         <button type="submit" class="btn-cari"><?= icon('search') ?> Terapkan Filter</button>
                     </form>
                 </div>
@@ -145,7 +159,7 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-title">Total Pemohon</div>
-                        <div class="stat-value"><?= $total_semua_data ?></div>
+                        <div class="stat-value" data-rt="total"><?= $total_semua_data ?></div>
                         <div class="stat-sub">Dokumen SPRI</div>
                     </div>
                     <div class="stat-card">
@@ -172,9 +186,9 @@
                     <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Klik loker untuk memfilter tabel.</p>
                     <div class="loker-grid">
                         <?php foreach ($loker_map as $lm): ?>
-                            <a class="loker-card" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= (int)$lm['id'] ?>">
+                            <a class="loker-card" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= (int)$lm['id'] ?>&jenis=<?= urlencode($jenis) ?>">
                                 <div class="loker-nomor">Loker <?= htmlspecialchars($lm['nomor']) ?></div>
-                                <div class="loker-jumlah"><?= (int)$lm['jumlah'] ?></div>
+                                <div class="loker-jumlah" data-rt="loker" data-rt-id="<?= (int)$lm['id'] ?>"><?= (int)$lm['jumlah'] ?></div>
                                 <div class="loker-label">arsip</div>
                             </a>
                         <?php endforeach; ?>
@@ -183,7 +197,7 @@
 
                 <div class="card-container" style="padding: 0;">
                     <div class="table-title" style="padding: 24px 28px 0 28px;">
-                        Rincian Pemohon Paspor
+                        <?= $jenis_nama !== '' ? 'Rincian Pemohon ' . htmlspecialchars($jenis_nama) : 'Rincian Pemohon' ?>
                         <button onclick="openModalTambah()" class="btn-tambah"><?= icon('edit') ?> Tambah Data</button>
                     </div>
                     <div class="table-responsive">
@@ -248,7 +262,7 @@
                         <div class="pagination-info">Menampilkan <b><?= ($total_semua_data == 0) ? 0 : $halaman_awal + 1 ?></b> - <b><?= min($halaman_awal + $batas_per_halaman, $total_semua_data) ?></b> dari <b><?= $total_semua_data ?></b> pemohon</div>
                         <ul class="pagination-nav">
                             <?php if ($halaman_aktif > 1): ?>
-                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $halaman_aktif - 1 ?>">&laquo; Prev</a></li>
+                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&jenis=<?= urlencode($jenis) ?>&halaman=<?= $halaman_aktif - 1 ?>">&laquo; Prev</a></li>
                             <?php else: ?>
                                 <li><span class="page-link disabled">&laquo; Prev</span></li>
                             <?php endif; ?>
@@ -256,21 +270,21 @@
                             $start_number = max(1, $halaman_aktif - 2);
                             $end_number = min($total_halaman, $halaman_aktif + 2);
                             if ($start_number > 1) {
-                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&halaman=1">1</a></li>';
+                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&jenis='.urlencode($jenis).'&halaman=1">1</a></li>';
                                 if ($start_number > 2) echo '<li><span class="page-link disabled">...</span></li>';
                             }
                             for ($i = $start_number; $i <= $end_number; $i++):
                             ?>
-                                <li><a class="page-link <?= ($halaman_aktif == $i) ? 'active' : '' ?>" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $i ?>"><?= $i ?></a></li>
+                                <li><a class="page-link <?= ($halaman_aktif == $i) ? 'active' : '' ?>" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&jenis=<?= urlencode($jenis) ?>&halaman=<?= $i ?>"><?= $i ?></a></li>
                             <?php endfor; ?>
                             <?php
                             if ($end_number < $total_halaman) {
                                 if ($end_number < $total_halaman - 1) echo '<li><span class="page-link disabled">...</span></li>';
-                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&halaman='.$total_halaman.'">'.$total_halaman.'</a></li>';
+                                echo '<li><a class="page-link" href="?cari='.urlencode($keyword).'&bulan='.$bulan_pilihan.'&tahun='.$tahun_pilihan.'&loker='.$loker_pilihan.'&jenis='.urlencode($jenis).'&halaman='.$total_halaman.'">'.$total_halaman.'</a></li>';
                             }
                             ?>
                             <?php if ($halaman_aktif < $total_halaman): ?>
-                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&halaman=<?= $halaman_aktif + 1 ?>">Next &raquo;</a></li>
+                                <li><a class="page-link" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= $loker_pilihan ?>&jenis=<?= urlencode($jenis) ?>&halaman=<?= $halaman_aktif + 1 ?>">Next &raquo;</a></li>
                             <?php else: ?>
                                 <li><span class="page-link disabled">Next &raquo;</span></li>
                             <?php endif; ?>
@@ -285,7 +299,7 @@
     <div class="modal-overlay" id="modalTambah">
         <div class="modal-container">
             <div class="modal-header">
-                <div class="modal-title"><?= icon('edit') ?> Tambah Pemohon SPRI</div>
+                <div class="modal-title"><?= icon('edit') ?> Tambah Pemohon <?= $jenis_nama !== '' ? htmlspecialchars($jenis_nama) : '' ?></div>
                 <button type="button" class="modal-close" onclick="closeModalTambah()">&times;</button>
             </div>
             <form action="" method="POST">
@@ -310,12 +324,17 @@
                         </div>
                         <div class="form-group-modal">
                             <label>Jenis Dokumen</label>
-                            <select name="dokumen" class="form-control" required>
-                                <option value="" disabled selected>-- Pilih Jenis --</option>
-                                <?php foreach ($dokumen_list as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <?php if ($jenis !== ''): ?>
+                                <input type="hidden" name="dokumen" value="<?= htmlspecialchars($jenis) ?>">
+                                <div class="form-control" style="background:#EEF2F7; color:var(--text-blue-grey);"><?= htmlspecialchars($jenis) ?> — <?= htmlspecialchars($jenis_nama) ?></div>
+                            <?php else: ?>
+                                <select name="dokumen" class="form-control" required>
+                                    <option value="" disabled selected>-- Pilih Jenis --</option>
+                                    <?php foreach ($dokumen_list as $d): ?>
+                                        <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php endif; ?>
                         </div>
                         <div class="form-group-modal">
                             <label>Status Keterangan</label>
@@ -385,12 +404,17 @@
                         </div>
                         <div class="form-group-modal">
                             <label>Jenis Dokumen</label>
-                            <select name="dokumen" id="edit_dokumen" class="form-control" required>
-                                <option value="" disabled>-- Pilih Jenis --</option>
-                                <?php foreach ($dokumen_list as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <?php if ($jenis !== ''): ?>
+                                <input type="hidden" name="dokumen" id="edit_dokumen" value="<?= htmlspecialchars($jenis) ?>">
+                                <div class="form-control" style="background:#EEF2F7; color:var(--text-blue-grey);"><?= htmlspecialchars($jenis) ?> — <?= htmlspecialchars($jenis_nama) ?></div>
+                            <?php else: ?>
+                                <select name="dokumen" id="edit_dokumen" class="form-control" required>
+                                    <option value="" disabled>-- Pilih Jenis --</option>
+                                    <?php foreach ($dokumen_list as $d): ?>
+                                        <option value="<?= htmlspecialchars($d['kode']) ?>"><?= htmlspecialchars($d['kode']) ?> - <?= htmlspecialchars($d['nama']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php endif; ?>
                         </div>
                         <div class="form-group-modal">
                             <label>Status Keterangan</label>
@@ -434,6 +458,7 @@
 
     <?= flash_toast_script() ?>
     <script src="asset/js/toast.js"></script>
+    <script src="asset/js/realtime.js"></script>
     <script>
         const mTambah = document.getElementById('modalTambah');
         const mEdit = document.getElementById('modalEdit');

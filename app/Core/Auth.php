@@ -42,6 +42,43 @@ class Auth
     }
 
     /**
+     * Daftar kode jenis dokumen yang boleh diakses user saat ini.
+     * '*' (admin / akses penuh) -> semua kode aktif dari master_dokumen.
+     */
+    public static function aksesDokumen(): array
+    {
+        $akses = (string)Session::get('user_akses', '*');
+        if ($akses === '' || $akses === '*') {
+            return array_column(MasterDokumen::allActive(), 'kode');
+        }
+        $kode = array_filter(array_map('trim', explode(',', $akses)), 'strlen');
+        return array_values(array_unique($kode));
+    }
+
+    /**
+     * Apakah user boleh mengakses jenis dokumen $kode? Admin / '*' selalu boleh.
+     */
+    public static function canAksesDokumen(string $kode): bool
+    {
+        if (self::isAdmin()) return true;
+        $akses = (string)Session::get('user_akses', '*');
+        if ($akses === '*') return true;
+        return in_array($kode, self::aksesDokumen(), true);
+    }
+
+    /**
+     * Wajib punya akses ke jenis dokumen $kode, selain itu redirect.
+     */
+    public static function requireAksesDokumen(string $kode, string $redirect = 'dashboard.php'): void
+    {
+        self::requireLogin();
+        if (!self::canAksesDokumen($kode)) {
+            header("Location: " . self::url($redirect));
+            exit;
+        }
+    }
+
+    /**
      * URL halaman lama (file stub langsung, misal login.php, dashboard.php).
      * Dipertahankan agar semua link/bookmark existing tetap berfungsi.
      */

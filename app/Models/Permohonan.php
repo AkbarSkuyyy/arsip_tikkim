@@ -137,18 +137,25 @@ class Permohonan
 
     /**
      * Peta loker: total arsip per loker aktif (semua periode) untuk grid
-     * "Peta Loker" di data_permohonan.php.
+     * "Peta Loker" di data_permohonan.php. $kodeFilter = daftar kode dokumen
+     * yang boleh diakses (kosong = semua).
      */
-    public static function lokerMap(): array
+    public static function lokerMap(array $kodeFilter = []): array
     {
-        $r = Database::raw("
-            SELECT ml.id, ml.nomor, ml.nama, COUNT(p.id) AS jumlah
-            FROM master_loker ml
-            LEFT JOIN permohonan p ON p.loker_id = ml.id
-            WHERE ml.aktif = 1
-            GROUP BY ml.id, ml.nomor, ml.nama
-            ORDER BY CAST(ml.nomor AS UNSIGNED) ASC
-        ");
+        $sql = "SELECT ml.id, ml.nomor, ml.nama, COUNT(p.id) AS jumlah
+                FROM master_loker ml
+                LEFT JOIN permohonan p ON p.loker_id = ml.id";
+        $types = '';
+        $params = [];
+        if (!empty($kodeFilter)) {
+            $sql .= " AND p.dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+            $types = str_repeat('s', count($kodeFilter));
+            $params = $kodeFilter;
+        }
+        $sql .= " WHERE ml.aktif = 1
+                GROUP BY ml.id, ml.nomor, ml.nama
+                ORDER BY CAST(ml.nomor AS UNSIGNED) ASC";
+        $r = Database::query($sql, $types, $params);
         $rows = [];
         while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
         return $rows;
@@ -157,7 +164,7 @@ class Permohonan
     /**
      * Query filter+paging untuk data_permohonan.php (kelola arsip per bulan).
      */
-    public static function search(string $keyword, int $bulan, int $tahun, int $limit, int $offset, int $lokerId = 0): array
+    public static function search(string $keyword, int $bulan, int $tahun, int $limit, int $offset, int $lokerId = 0, array $kodeFilter = []): array
     {
         $sql = "SELECT p.*, ml.nomor AS loker_nomor FROM permohonan p LEFT JOIN master_loker ml ON ml.id = p.loker_id WHERE MONTH(p.tanggal_input) = ? AND YEAR(p.tanggal_input) = ?";
         $types = 'ii';
@@ -166,6 +173,11 @@ class Permohonan
             $sql .= " AND p.loker_id = ?";
             $types .= 'i';
             $params[] = $lokerId;
+        }
+        if (!empty($kodeFilter)) {
+            $sql .= " AND p.dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+            $types .= str_repeat('s', count($kodeFilter));
+            foreach ($kodeFilter as $k) $params[] = $k;
         }
         if ($keyword !== '') {
             $sql .= " AND p.nama_pemohon LIKE ?";
@@ -182,7 +194,7 @@ class Permohonan
         return $rows;
     }
 
-    public static function searchCount(string $keyword, int $bulan, int $tahun, int $lokerId = 0): int
+    public static function searchCount(string $keyword, int $bulan, int $tahun, int $lokerId = 0, array $kodeFilter = []): int
     {
         $sql = "SELECT COUNT(*) as total FROM permohonan WHERE MONTH(tanggal_input) = ? AND YEAR(tanggal_input) = ?";
         $types = 'ii';
@@ -191,6 +203,11 @@ class Permohonan
             $sql .= " AND loker_id = ?";
             $types .= 'i';
             $params[] = $lokerId;
+        }
+        if (!empty($kodeFilter)) {
+            $sql .= " AND dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+            $types .= str_repeat('s', count($kodeFilter));
+            foreach ($kodeFilter as $k) $params[] = $k;
         }
         if ($keyword !== '') {
             $sql .= " AND nama_pemohon LIKE ?";
@@ -201,18 +218,23 @@ class Permohonan
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
 
-    public static function rekapBulan(int $bulan, int $tahun): array
+    public static function rekapBulan(int $bulan, int $tahun, array $kodeFilter = []): array
     {
-        $r = Database::query(
-            "SELECT
+        $sql = "SELECT
                 COUNT(*) AS total_baru_atau_ganti,
                 SUM(CASE WHEN keterangan = 'Baru' THEN 1 ELSE 0 END) AS total_baru,
                 SUM(CASE WHEN keterangan LIKE '%Penggantian%' THEN 1 ELSE 0 END) AS total_penggantian,
                 SUM(CASE WHEN jenis_kelamin = 'L' THEN 1 ELSE 0 END) AS total_laki,
                 SUM(CASE WHEN jenis_kelamin = 'P' THEN 1 ELSE 0 END) AS total_perempuan
-             FROM permohonan WHERE MONTH(tanggal_input) = ? AND YEAR(tanggal_input) = ?",
-            'ii', [$bulan, $tahun]
-        );
+             FROM permohonan WHERE MONTH(tanggal_input) = ? AND YEAR(tanggal_input) = ?";
+        $types = 'ii';
+        $params = [$bulan, $tahun];
+        if (!empty($kodeFilter)) {
+            $sql .= " AND dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+            $types .= str_repeat('s', count($kodeFilter));
+            foreach ($kodeFilter as $k) $params[] = $k;
+        }
+        $r = Database::query($sql, $types, $params);
         return mysqli_fetch_assoc($r) ?: ['total_baru' => 0, 'total_penggantian' => 0, 'total_laki' => 0, 'total_perempuan' => 0];
     }
 

@@ -30,6 +30,7 @@ class DashboardSuperController
         [$log_labels, $log_data] = Log::dailyActivity(14);
 
         $users = User::all();
+        $dokumen_list = MasterDokumen::allActive();
         $logs = Log::recent(10);
 
         $conn = Database::conn();

@@ -43,6 +43,7 @@ class AuthController
                     Session::set('user_jabatan', $row['jabatan']);
                     Session::set('username', $row['username']);
                     Session::set('user_role', $row['role']);
+                    Session::set('user_akses', $row['akses_dokumen'] ?? '*');
                     Session::set('user_foto', $row['foto_profile']);
 
                     catatLog(Session::get('user_nama'), "User berhasil login ke sistem.");

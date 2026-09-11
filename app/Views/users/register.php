@@ -1,7 +1,7 @@
 <?php
 /**
  * View: form registrasi akun baru (Kelola Akun). Variabel dari
- * UserController::register(): $pesan_sukses, $pesan_error
+ * UserController::register(): $pesan_sukses, $pesan_error, $dokumen_list
  */
 ?>
 <!DOCTYPE html>
@@ -31,6 +31,9 @@
         .btn-primary { background: var(--imigrasi-blue); color: #fff; flex: 1; }
         .btn-primary:hover { background: #08305A; }
         .btn-cancel { background: #E2E8F0; color: #475569; }
+        .akses-list { border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; max-height: 220px; overflow-y: auto; background: #F8FAFC; }
+        .akses-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-weight: 500; cursor: pointer; font-size: 0.9rem; }
+        .akses-item input { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -77,6 +80,18 @@
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Akses Jenis Dokumen</label>
+                        <div id="akses-group" class="akses-list">
+                            <?php foreach ($dokumen_list as $d): ?>
+                            <label class="akses-item">
+                                <input type="checkbox" name="akses_dokumen[]" value="<?= htmlspecialchars($d['kode']) ?>" class="akses-cb">
+                                <span><?= htmlspecialchars($d['kode']) ?> — <?= htmlspecialchars($d['nama']) ?></span>
+                            </label>
+                            <?php endforeach; ?>
+                            <p style="font-size:0.8rem; color:var(--text-blue-grey); margin-top:8px; margin-bottom:0;">Admin otomatis mendapat akses ke semua jenis dokumen.</p>
+                        </div>
+                    </div>
                     <div class="btn-group">
                         <a href="dashboard_super.php" class="btn btn-cancel">Kembali</a>
                         <button type="submit" name="register" class="btn btn-primary">Daftarkan Akun</button>
@@ -85,5 +100,16 @@
             </div>
         </div>
     </main>
+    <script>
+        const roleSel = document.querySelector('select[name="role"]');
+        const aksesGroup = document.getElementById('akses-group');
+        function syncAkses() {
+            const isAdmin = roleSel.value === 'admin';
+            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; });
+            aksesGroup.style.opacity = isAdmin ? '0.5' : '1';
+        }
+        roleSel.addEventListener('change', syncAkses);
+        syncAkses();
+    </script>
 </body>
 </html>

@@ -21,6 +21,7 @@ if ($page === '') {
 
 // Untuk penyorotan menu aktif di sidebar (membandingkan 'dashboard.php').
 $GLOBALS['current_page'] = $page . '.php';
+$GLOBALS['current_jenis'] = isset($_GET['jenis']) ? trim((string)$_GET['jenis']) : '';
 
 if (!Router::has($page)) {
     http_response_code(404);
