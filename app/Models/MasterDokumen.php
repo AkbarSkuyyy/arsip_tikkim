@@ -7,7 +7,7 @@ class MasterDokumen
 {
     public static function allActive(): array
     {
-        $r = Database::raw("SELECT * FROM master_dokumen WHERE aktif=1 ORDER BY kode ASC");
+        $r = Database::raw("SELECT * FROM master_dokumen WHERE aktif=1 ORDER BY CAST(kode AS UNSIGNED) ASC");
         $rows = [];
         while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
         return $rows;
@@ -15,7 +15,7 @@ class MasterDokumen
 
     public static function all(): array
     {
-        $r = Database::raw("SELECT * FROM master_dokumen ORDER BY aktif DESC, kode ASC");
+        $r = Database::raw("SELECT * FROM master_dokumen ORDER BY aktif DESC, CAST(kode AS UNSIGNED) ASC");
         $rows = [];
         while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
         return $rows;

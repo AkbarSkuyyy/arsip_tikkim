@@ -29,6 +29,8 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
     .nav-item:hover { background-color: rgba(255,255,255,0.06); color: #fff; }
     .nav-item.active { background-color: rgba(245,166,35,0.15); color: #F5A623; border-left: 4px solid #F5A623; }
+    .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
+    .nav-subitem .icon svg { width: 14px; height: 14px; }
 
     .sidebar-super-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
     .user-avatar { width: 36px; height: 36px; background: rgba(245,166,35,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
@@ -74,8 +76,8 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
             </li>
             <?php foreach (MasterDokumen::allActive() as $md): ?>
             <li>
-                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item <?= ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : '' ?>" style="padding-left: 34px;">
-                    <?= icon('file') ?> <?= htmlspecialchars($md['nama']) ?>
+                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item nav-subitem <?= ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : '' ?>">
+                    <?= icon('file') ?> <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><?= htmlspecialchars($md['nama']) ?></span>
                 </a>
             </li>
             <?php endforeach; ?>
@@ -92,7 +94,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
                 </a>
             </li>
             <li>
-                <a href="register.php" class="nav-item <?= ($GLOBALS['current_page'] == 'register.php') ? 'active' : '' ?>" style="padding-left: 34px;">
+                <a href="register.php" class="nav-item nav-subitem <?= ($GLOBALS['current_page'] == 'register.php') ? 'active' : '' ?>">
                     <?= icon('edit') ?> Tambah Akun
                 </a>
             </li>

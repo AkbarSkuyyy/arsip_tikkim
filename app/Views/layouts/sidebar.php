@@ -30,6 +30,8 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
     .nav-item:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
     .nav-item.active { background-color: #0B427B; color: #fff; border-left: 4px solid #F5A623; }
+    .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
+    .nav-subitem .icon svg { width: 14px; height: 14px; }
     
     .sidebar-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
     .user-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
@@ -73,8 +75,8 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             foreach ($menu_dok as $md):
             ?>
             <li>
-                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : ''; ?>" style="padding-left: 34px;">
-                    <?= icon('file') ?> <?= htmlspecialchars($md['nama']) ?>
+                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item nav-subitem <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : ''; ?>">
+                    <?= icon('file') ?> <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><?= htmlspecialchars($md['nama']) ?></span>
                 </a>
             </li>
             <?php endforeach; ?>
