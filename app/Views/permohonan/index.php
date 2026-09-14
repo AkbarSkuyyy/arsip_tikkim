@@ -217,7 +217,9 @@
                 <div class="card-container" style="padding: 0;">
                     <div class="table-title" style="padding: 24px 28px 0 28px;">
                         <?= $jenis_nama !== '' ? 'Rincian Pemohon ' . htmlspecialchars($jenis_nama) : 'Rincian Pemohon' ?>
+                        <?php if (Auth::canMutate()): ?>
                         <button onclick="openModalTambah()" class="btn-tambah"><?= icon('edit') ?> Tambah Data</button>
+                        <?php endif; ?>
                     </div>
                     <div class="table-responsive">
                         <table style="margin-top: 10px;">
@@ -254,6 +256,7 @@
                                         <td><span class="<?= $badge_class ?>"><?= htmlspecialchars($row['keterangan']) ?></span></td>
                                         <td><span class="badge-lokasi"><?= $lokasi ?></span></td>
                                         <td style="padding-right: 28px;">
+                                            <?php if (Auth::canMutate()): ?>
                                             <div class="action-flex">
                                                 <button onclick="openModalEdit('<?= htmlspecialchars(json_encode([
                                                     'id' => $row['id'],
@@ -280,6 +283,9 @@
                                                     <button type="submit" class="btn-aksi btn-hapus"><?= icon('trash') ?> Hapus</button>
                                                 </form>
                                             </div>
+                                            <?php else: ?>
+                                            <span style="color: var(--text-blue-grey); font-size: 0.8rem; font-weight: 600;">Lihat saja</span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; else: ?>

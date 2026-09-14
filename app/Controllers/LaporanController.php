@@ -12,7 +12,13 @@ class LaporanController
         $tgl_mulai  = $_GET['tgl_mulai']  ?? date('Y-m-01');
         $tgl_selesai = $_GET['tgl_selesai'] ?? date('Y-m-t');
 
-        $data_laporan = Permohonan::byPeriode($cari, $tgl_mulai, $tgl_selesai);
+        $kode_filter = [];
+        if (Auth::isPetugas()) {
+            $kode_tunggal = Auth::aksesDokumenTunggal();
+            if ($kode_tunggal !== '') $kode_filter = [$kode_tunggal];
+        }
+
+        $data_laporan = Permohonan::byPeriode($cari, $tgl_mulai, $tgl_selesai, $kode_filter);
 
         $total_data = count($data_laporan);
         $total_L = 0; $total_P = 0; $total_baru = 0; $total_ganti = 0;

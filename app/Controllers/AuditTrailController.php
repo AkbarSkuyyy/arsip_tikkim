@@ -6,7 +6,7 @@ class AuditTrailController
 {
     public function index(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $cari      = isset($_GET['cari']) ? trim($_GET['cari']) : '';
         $f_user    = isset($_GET['user']) ? trim($_GET['user']) : '';

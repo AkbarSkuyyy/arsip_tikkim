@@ -43,33 +43,38 @@ class Permohonan
         return Database::exec("DELETE FROM permohonan WHERE id = ?", 'i', [$id]);
     }
 
-    public static function count(): int
+    public static function count(array $kodeFilter = []): int
     {
-        $r = Database::raw("SELECT COUNT(*) as total FROM permohonan");
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT COUNT(*) as total FROM permohonan" . $where, $types, $params);
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
 
-    public static function countByKeteranganLike(string $like): int
+    public static function countByKeteranganLike(string $like, array $kodeFilter = []): int
     {
-        $r = Database::query("SELECT COUNT(*) as total FROM permohonan WHERE keterangan LIKE ?", 's', ["%$like%"]);
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT COUNT(*) as total FROM permohonan WHERE keterangan LIKE ?" . $where, 's' . $types, array_merge(["%$like%"], $params));
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
 
-    public static function countToday(): int
+    public static function countToday(array $kodeFilter = []): int
     {
-        $r = Database::raw("SELECT COUNT(*) as total FROM permohonan WHERE tanggal_input = CURDATE()");
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT COUNT(*) as total FROM permohonan WHERE tanggal_input = CURDATE()" . $where, $types, $params);
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
 
-    public static function countThisMonth(): int
+    public static function countThisMonth(array $kodeFilter = []): int
     {
-        $r = Database::raw("SELECT COUNT(*) as total FROM permohonan WHERE DATE_FORMAT(tanggal_input, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')");
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT COUNT(*) as total FROM permohonan WHERE DATE_FORMAT(tanggal_input, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')" . $where, $types, $params);
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
 
-    public static function genderBreakdown(): array
+    public static function genderBreakdown(array $kodeFilter = []): array
     {
-        $r = Database::raw("SELECT jenis_kelamin, COUNT(*) as jumlah FROM permohonan WHERE jenis_kelamin IN ('L','P') GROUP BY jenis_kelamin");
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT jenis_kelamin, COUNT(*) as jumlah FROM permohonan WHERE jenis_kelamin IN ('L','P')" . $where . " GROUP BY jenis_kelamin", $types, $params);
         $laki = 0; $perempuan = 0;
         while ($row = mysqli_fetch_assoc($r)) {
             if (strtoupper($row['jenis_kelamin']) === 'L') $laki = (int)$row['jumlah'];
@@ -78,20 +83,31 @@ class Permohonan
         return ['L' => $laki, 'P' => $perempuan];
     }
 
-    public static function recent(int $limit = 5): array
+    public static function recent(int $limit = 5, array $kodeFilter = []): array
     {
-        $r = Database::raw("SELECT * FROM permohonan ORDER BY id DESC LIMIT " . (int)$limit);
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $whereClause = $where !== '' ? ' WHERE ' . substr($where, 5) : '';
+        $r = Database::query("SELECT * FROM permohonan" . $whereClause . " ORDER BY id DESC LIMIT " . (int)$limit, $types, $params);
         $rows = [];
-        while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
+        if ($r) while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
         return $rows;
     }
 
-    public static function monthlyTrend(int $months = 12): array
+    public static function monthlyTrend(int $months = 12, array $kodeFilter = []): array
     {
-        $r = Database::raw("SELECT DATE_FORMAT(tanggal_input, '%Y-%m') AS bulan, COUNT(*) AS total FROM permohonan WHERE tanggal_input IS NOT NULL GROUP BY DATE_FORMAT(tanggal_input, '%Y-%m') ORDER BY bulan DESC LIMIT " . (int)$months);
+        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        $r = Database::query("SELECT DATE_FORMAT(tanggal_input, '%Y-%m') AS bulan, COUNT(*) AS total FROM permohonan WHERE tanggal_input IS NOT NULL" . $where . " GROUP BY DATE_FORMAT(tanggal_input, '%Y-%m') ORDER BY bulan DESC LIMIT " . (int)$months, $types, $params);
         $labels = []; $data = [];
-        while ($row = mysqli_fetch_assoc($r)) { $labels[] = $row['bulan']; $data[] = (int)$row['total']; }
+        if ($r) while ($row = mysqli_fetch_assoc($r)) { $labels[] = $row['bulan']; $data[] = (int)$row['total']; }
         return [array_reverse($labels), array_reverse($data)];
+    }
+
+    /** Helper: klausa WHERE untuk filter jenis dokumen. Return [where, types, params]. */
+    private static function dokWhere(array $kodeFilter): array
+    {
+        if (empty($kodeFilter)) return ['', '', []];
+        $ph = implode(',', array_fill(0, count($kodeFilter), '?'));
+        return [' AND dokumen IN (' . $ph . ')', str_repeat('s', count($kodeFilter)), $kodeFilter];
     }
 
     public static function dokumenBreakdown(): array
@@ -331,11 +347,16 @@ class Permohonan
     }
 
     /** Laporan periode tanggal (laporan.php / export_excel.php). */
-    public static function byPeriode(string $keyword, string $tglMulai, string $tglSelesai): array
+    public static function byPeriode(string $keyword, string $tglMulai, string $tglSelesai, array $kodeFilter = []): array
     {
         $sql = "SELECT * FROM permohonan WHERE tanggal_input BETWEEN ? AND ?";
         $types = 'ss';
         $params = [$tglMulai, $tglSelesai];
+        if (!empty($kodeFilter)) {
+            $sql .= " AND dokumen IN (" . implode(',', array_fill(0, count($kodeFilter), '?')) . ")";
+            $types .= str_repeat('s', count($kodeFilter));
+            foreach ($kodeFilter as $k) $params[] = $k;
+        }
         if ($keyword !== '') {
             $sql .= " AND nama_pemohon LIKE ?";
             $types .= 's';

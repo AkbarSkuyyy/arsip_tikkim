@@ -29,8 +29,10 @@
         td { padding: 14px; border-bottom: 1px solid var(--border-light); font-size: 0.92rem; font-weight: 500; }
         tbody tr:hover { background: rgba(244, 247, 250, 0.5); }
         .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .role-admin { background: rgba(245, 166, 35, 0.15); color: #D48806; }
+        .role-superadmin { background: rgba(245, 166, 35, 0.15); color: #B45309; }
+        .role-admin { background: rgba(245, 166, 35, 0.12); color: #D48806; }
         .role-user { background: rgba(11, 66, 123, 0.1); color: var(--imigrasi-blue); }
+        .role-viewer { background: rgba(16, 185, 129, 0.12); color: #059669; }
         .akses-chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(99, 102, 241, 0.12); color: #4F46E5; margin: 1px; }
         .akses-chip.semua { background: rgba(245, 166, 35, 0.15); color: #D48806; }
         .btn-edit, .btn-delete, .btn-reset { padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: 0.2s; display: inline-block; border: none; cursor: pointer; white-space: nowrap; }
@@ -80,7 +82,7 @@
                                 <td><?= htmlspecialchars($usr['username']) ?></td>
                                 <td><?= htmlspecialchars($usr['jabatan']) ?></td>
                                 <td style="color:var(--text-blue-grey);"><?= htmlspecialchars($usr['email']) ?></td>
-                                <td><span class="role-badge <?= $usr['role'] === 'admin' ? 'role-admin' : 'role-user' ?>"><?= htmlspecialchars($usr['role']) ?></span></td>
+                                <td><span class="role-badge role-<?= htmlspecialchars($usr['role']) ?>"><?= htmlspecialchars(UserController::roleLabel($usr['role'])) ?></span></td>
                                 <td>
                                     <?php if (($usr['akses_dokumen'] ?? '*') === '*'): ?>
                                         <span class="akses-chip semua">Semua</span>

@@ -10,7 +10,14 @@ class PermohonanController
     {
         Auth::requireLogin();
 
-        $is_full = Auth::isAdmin();
+        // Viewer (kepala kantor) read-only: tolak semua mutasi POST.
+        if (Auth::isReadOnly() && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            Session::flashSet('error', 'Akun Anda hanya bisa melihat data (read-only).');
+            header("Location: data_permohonan.php");
+            exit;
+        }
+
+        $is_full = Auth::isFullDataAccess();
 
         $dokumen_list = MasterDokumen::allActive();
         $dok_by_kode = [];

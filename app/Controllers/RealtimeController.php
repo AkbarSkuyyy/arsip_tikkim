@@ -13,7 +13,7 @@ class RealtimeController
     {
         Auth::requireLogin();
 
-        $is_full = Auth::isAdmin();
+        $is_full = Auth::isFullDataAccess();
         $kode_filter = [];
         if (!$is_full) {
             $kode_tunggal = Auth::aksesDokumenTunggal();

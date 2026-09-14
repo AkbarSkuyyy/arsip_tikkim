@@ -71,23 +71,27 @@ class PengaturanController
             }
         }
 
-        // 3. UPDATE PENGATURAN INSTANSI
+        // 3. UPDATE PENGATURAN INSTANSI — khusus superadmin
         if (isset($_POST['simpan_aplikasi'])) {
             Csrf::verify();
 
-            $data = [
-                'kementerian' => trim($_POST['kementerian']),
-                'instansi' => trim($_POST['instansi']),
-                'seksi' => trim($_POST['seksi']),
-                'pejabat_nama' => trim($_POST['pejabat_nama']),
-                'pejabat_jabatan' => trim($_POST['pejabat_jabatan']),
-                'pejabat_nip' => trim($_POST['pejabat_nip']),
-            ];
-
-            if (Pengaturan::update($data)) {
-                $pesan_sukses = "Pengaturan instansi berhasil disimpan!";
+            if (!Auth::isSuperadmin()) {
+                $pesan_error = "Hanya superadmin yang bisa mengubah pengaturan instansi!";
             } else {
-                $pesan_error = "Gagal menyimpan pengaturan instansi.";
+                $data = [
+                    'kementerian' => trim($_POST['kementerian']),
+                    'instansi' => trim($_POST['instansi']),
+                    'seksi' => trim($_POST['seksi']),
+                    'pejabat_nama' => trim($_POST['pejabat_nama']),
+                    'pejabat_jabatan' => trim($_POST['pejabat_jabatan']),
+                    'pejabat_nip' => trim($_POST['pejabat_nip']),
+                ];
+
+                if (Pengaturan::update($data)) {
+                    $pesan_sukses = "Pengaturan instansi berhasil disimpan!";
+                } else {
+                    $pesan_error = "Gagal menyimpan pengaturan instansi.";
+                }
             }
         }
 

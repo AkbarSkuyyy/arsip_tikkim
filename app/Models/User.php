@@ -79,7 +79,18 @@ class User
 
     public static function countAdmin(): int
     {
-        $r = Database::raw("SELECT COUNT(*) as total FROM users WHERE role='admin'");
+        $r = Database::raw("SELECT COUNT(*) as total FROM users WHERE role IN ('superadmin','admin')");
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
+    }
+
+    /** Jumlah user per role (superadmin/admin/user/viewer). */
+    public static function roleBreakdown(): array
+    {
+        $r = Database::raw("SELECT role, COUNT(*) AS jumlah FROM users GROUP BY role");
+        $map = ['superadmin' => 0, 'admin' => 0, 'user' => 0, 'viewer' => 0];
+        while ($row = mysqli_fetch_assoc($r)) {
+            if (isset($map[$row['role']])) $map[$row['role']] = (int)$row['jumlah'];
+        }
+        return $map;
     }
 }

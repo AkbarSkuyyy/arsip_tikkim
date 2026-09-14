@@ -55,8 +55,10 @@
                     <div class="form-group">
                         <label>Pilih Role</label>
                         <select name="role" class="form-control">
-                            <option value="user" <?= $user['role'] == 'user' ? 'selected' : '' ?>>User Biasa</option>
-                            <option value="admin" <?= $user['role'] == 'admin' ? 'selected' : '' ?>>Admin (Super Admin)</option>
+                            <option value="user" <?= $user['role'] == 'user' ? 'selected' : '' ?>>Petugas — fokus 1 jenis dokumen</option>
+                            <option value="admin" <?= $user['role'] == 'admin' ? 'selected' : '' ?>>Admin — pengumpul semua jenis</option>
+                            <option value="viewer" <?= $user['role'] == 'viewer' ? 'selected' : '' ?>>Viewer — lihat saja (kepala kantor)</option>
+                            <option value="superadmin" <?= $user['role'] == 'superadmin' ? 'selected' : '' ?>>Super Admin — kelola sistem</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -68,7 +70,7 @@
                                 <span><?= htmlspecialchars($d['kode']) ?> — <?= htmlspecialchars($d['nama']) ?></span>
                             </label>
                             <?php endforeach; ?>
-                            <p class="akses-hint">User biasa hanya mengelola SATU jenis dokumen permohonan. Admin otomatis mendapat akses ke semua jenis dokumen.</p>
+                            <p class="akses-hint">Hanya petugas yang memilih SATU jenis dokumen. Admin, Viewer, dan Super Admin otomatis akses semua jenis.</p>
                         </div>
                     </div>
                     <div class="btn-group">
@@ -83,9 +85,9 @@
         const roleSel = document.querySelector('select[name="role"]');
         const aksesGroup = document.getElementById('akses-group');
         function syncAkses() {
-            const isAdmin = roleSel.value === 'admin';
-            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = isAdmin; cb.required = !isAdmin; });
-            aksesGroup.style.opacity = isAdmin ? '0.5' : '1';
+            const isPetugas = roleSel.value === 'user';
+            document.querySelectorAll('.akses-cb').forEach(function (cb) { cb.disabled = !isPetugas; cb.required = isPetugas; });
+            aksesGroup.style.opacity = isPetugas ? '1' : '0.5';
         }
         roleSel.addEventListener('change', syncAkses);
         syncAkses();

@@ -1,15 +1,47 @@
 <?php
 /**
- * Controller: manajemen akun pengguna (register, edit role+akses, reset password, hapus).
- * User biasa hanya boleh mengelola SATU jenis dokumen permohonan; hal ini
- * diatur oleh superadmin lewat form tambah/edit akun (radio pilihan, bukan
- * multi-select). Admin selalu punya akses ke semua jenis ('*').
+ * Controller: manajemen akun pengguna (daftar, register, edit role+akses,
+ * reset password, hapus). Halaman ini khusus SUPERADMIN.
+ *
+ * Role (4 tingkat):
+ *  - superadmin : kelola sistem penuh + semua data
+ *  - admin      : pengumpul data (semua jenis), tanpa menu sistem
+ *  - user       : petugas arsip, fokus 1 jenis dokumen
+ *  - viewer     : kepala kantor, lihat semua (read-only)
  */
 class UserController
 {
+    /** Daftar role yang valid. */
+    private const ROLES = ['superadmin', 'admin', 'user', 'viewer'];
+
+    /** Label role untuk tampilan. */
+    public static function roleLabel(string $role): string
+    {
+        return [
+            'superadmin' => 'Super Admin',
+            'admin'      => 'Admin',
+            'user'       => 'Petugas',
+            'viewer'     => 'Viewer',
+        ][$role] ?? $role;
+    }
+
+    /** Normalisasi role dari input POST. */
+    private function normalizeRole(string $role): string
+    {
+        return in_array($role, self::ROLES, true) ? $role : 'user';
+    }
+
+    /** Akses dokumen berdasar role: non-petugas = '*', petugas = 1 kode. */
+    private function aksesForRole(string $role, string $postedAkses): string
+    {
+        return in_array($role, ['superadmin', 'admin', 'viewer'], true)
+            ? '*'
+            : trim($postedAkses);
+    }
+
     public function index(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $users = User::all();
         $dokumen_list = MasterDokumen::allActive();
@@ -19,7 +51,7 @@ class UserController
 
     public function register(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $pesan_sukses = "";
         $pesan_error = "";
@@ -32,27 +64,21 @@ class UserController
             $username = trim($_POST['username']);
             $jabatan  = trim($_POST['jabatan']);
             $email    = trim($_POST['email']);
-            $role     = ($_POST['role'] === 'admin') ? 'admin' : 'user';
+            $role     = $this->normalizeRole($_POST['role'] ?? 'user');
             $password = $_POST['password'];
-
-            // Akses jenis dokumen: admin = semua ('*'); user = tepat SATU jenis dokumen.
-            if ($role === 'admin') {
-                $akses_dokumen = '*';
-            } else {
-                $akses_dokumen = trim((string)($_POST['akses_dokumen'] ?? ''));
-            }
+            $akses_dokumen = $this->aksesForRole($role, (string)($_POST['akses_dokumen'] ?? ''));
 
             if (strlen($password) < 8) {
                 $pesan_error = "Kata sandi minimal 8 karakter!";
             } elseif ($role === 'user' && $akses_dokumen === '') {
-                $pesan_error = "Pilih satu jenis dokumen untuk akun ini!";
+                $pesan_error = "Pilih satu jenis dokumen untuk akun petugas!";
             } elseif (User::existsByEmailOrUsername($email, $username)) {
                 $pesan_error = "Email atau Username tersebut sudah terdaftar!";
             } else {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
                 if (User::create(['nama' => $nama, 'username' => $username, 'jabatan' => $jabatan, 'email' => $email, 'password' => $hashed, 'role' => $role, 'akses_dokumen' => $akses_dokumen])) {
                     catatLog(Auth::userNama(), "Menambah akun baru: $username (role: $role, akses: $akses_dokumen)");
-                    $pesan_sukses = "Akun berhasil dibuat dengan role: $role.";
+                    $pesan_sukses = "Akun berhasil dibuat dengan role: " . self::roleLabel($role) . ".";
                 } else {
                     $pesan_error = "Terjadi kesalahan saat menyimpan akun.";
                 }
@@ -64,7 +90,7 @@ class UserController
 
     public function edit(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $id = (int)($_GET['id'] ?? 0);
         $user = User::find($id);
@@ -79,16 +105,14 @@ class UserController
 
         if (isset($_POST['update_role'])) {
             Csrf::verify();
-            $role = ($_POST['role'] === 'admin') ? 'admin' : 'user';
-            if ($role === 'admin') {
-                $akses_dokumen = '*';
-            } else {
-                $akses_dokumen = trim((string)($_POST['akses_dokumen'] ?? ''));
-            }
+            $role = $this->normalizeRole($_POST['role'] ?? 'user');
+            $akses_dokumen = $this->aksesForRole($role, (string)($_POST['akses_dokumen'] ?? ''));
 
             if ($role === 'user' && $akses_dokumen === '') {
-                $error = "Pilih satu jenis dokumen untuk akun ini!";
+                $error = "Pilih satu jenis dokumen untuk akun petugas!";
                 $akses_sekarang = $akses_dokumen;
+            } elseif ($role === 'superadmin' && $this->isLastSuperadmin($id)) {
+                $error = "Tidak bisa menurunkan role superadmin terakhir!";
             } else {
                 Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
                 catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
@@ -102,7 +126,7 @@ class UserController
 
     public function resetPassword(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $id = (int)($_GET['id'] ?? 0);
         $user = User::find($id);
@@ -133,7 +157,7 @@ class UserController
 
     public function destroy(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: kelola_akun.php");
@@ -146,12 +170,27 @@ class UserController
         if ($id > 0) {
             $user = User::find($id);
             if ($user) {
-                User::delete($id);
-                catatLog(Auth::userNama(), "Menghapus akun user: " . $user['username']);
+                if ((int)$user['id'] === Auth::userId()) {
+                    Session::flashSet('error', 'Anda tidak bisa menghapus akun sendiri!');
+                } elseif ($user['role'] === 'superadmin' && $this->isLastSuperadmin((int)$user['id'])) {
+                    Session::flashSet('error', 'Tidak bisa menghapus superadmin terakhir!');
+                } else {
+                    User::delete($id);
+                    catatLog(Auth::userNama(), "Menghapus akun user: " . $user['username']);
+                    Session::flashSet('success', 'Akun telah dihapus.');
+                }
             }
         }
 
         header("Location: kelola_akun.php");
         exit;
+    }
+
+    /** Apakah $id adalah superadmin terakhir yang tersisa? */
+    private function isLastSuperadmin(int $id): bool
+    {
+        $r = Database::query("SELECT COUNT(*) AS t FROM users WHERE role = 'superadmin' AND id != ?", 'i', [$id]);
+        $count = (int)(mysqli_fetch_assoc($r)['t'] ?? 0);
+        return $count === 0;
     }
 }

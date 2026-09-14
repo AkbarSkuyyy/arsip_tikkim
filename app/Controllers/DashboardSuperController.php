@@ -6,7 +6,7 @@ class DashboardSuperController
 {
     public function index(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
         Session::set('ui_mode', 'super');
 
         $total_data  = Permohonan::count();
@@ -14,6 +14,7 @@ class DashboardSuperController
         $total_bulan_ini = Permohonan::countThisMonth();
         $total_users = User::count();
         $total_admin = User::countAdmin();
+        $role_breakdown = User::roleBreakdown();
 
         [$dok_labels, $dok_data] = Permohonan::dokumenBreakdown();
         [$ket_labels, $ket_data] = Permohonan::keteranganBreakdown();

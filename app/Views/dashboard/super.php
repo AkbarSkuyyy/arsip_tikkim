@@ -56,8 +56,10 @@
         .btn-delete { background: #EF4444; color: #fff; }
         .btn-edit:hover, .btn-delete:hover, .btn-reset:hover { opacity: 0.8; }
         .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
-        .role-admin { background: rgba(245,166,35,0.15); color: #D48806; }
+        .role-superadmin { background: rgba(245,166,35,0.15); color: #B45309; }
+        .role-admin { background: rgba(245,166,35,0.12); color: #D48806; }
         .role-user { background: rgba(11,66,123,0.1); color: var(--imigrasi-blue); }
+        .role-viewer { background: rgba(16,185,129,0.12); color: #059669; }
         .akses-chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(99,102,241,0.12); color: #4F46E5; margin: 1px; }
         .sys-info-list { display: flex; flex-direction: column; gap: 14px; }
         .sys-info-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
@@ -173,7 +175,7 @@
                                 <td><?= htmlspecialchars($usr['nama']) ?></td>
                                 <td><?= htmlspecialchars($usr['username']) ?></td>
                                 <td><?= htmlspecialchars($usr['jabatan']) ?></td>
-                                <td><span class="role-badge <?= $usr['role'] === 'admin' ? 'role-admin' : 'role-user' ?>"><?= htmlspecialchars($usr['role']) ?></span></td>
+                                <td><span class="role-badge role-<?= htmlspecialchars($usr['role']) ?>"><?= htmlspecialchars(UserController::roleLabel($usr['role'])) ?></span></td>
                                 <td>
                                     <?php if (($usr['akses_dokumen'] ?? '*') === '*'): ?>
                                         <span class="akses-chip" style="background: rgba(245,166,35,0.15); color:#D48806;">Semua</span>
@@ -235,7 +237,7 @@
 
         new Chart(document.getElementById('chartRole').getContext('2d'), {
             type: 'doughnut',
-            data: { labels: ['Admin', 'User'], datasets: [{ data: [<?= (int)$total_admin ?>, <?= (int)($total_users - $total_admin) ?>], backgroundColor: ['#F5A623', '#0B427B'], borderWidth: 0, hoverOffset: 4 }] },
+            data: { labels: ['Super Admin', 'Admin', 'Petugas', 'Viewer'], datasets: [{ data: [<?= (int)$role_breakdown['superadmin'] ?>, <?= (int)$role_breakdown['admin'] ?>, <?= (int)$role_breakdown['user'] ?>, <?= (int)$role_breakdown['viewer'] ?>], backgroundColor: ['#B45309', '#F5A623', '#0B427B', '#10B981'], borderWidth: 0, hoverOffset: 4 }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { font: chartFont, boxWidth: 12, padding: 12 } } } }
         });
 

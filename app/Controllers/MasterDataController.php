@@ -6,11 +6,9 @@ class MasterDataController
 {
     public function index(): void
     {
-        Auth::requireLogin();
+        Auth::requireSuperadmin();
 
-        $is_admin = Auth::isAdmin();
-
-        if ($is_admin && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Csrf::verify();
             $aksi = $_POST['aksi'] ?? '';
 

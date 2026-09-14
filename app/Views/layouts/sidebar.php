@@ -8,8 +8,8 @@ $user_nama = isset($_SESSION['user_nama']) ? $_SESSION['user_nama'] : 'User';
 $user_jabatan = isset($_SESSION['user_jabatan']) ? $_SESSION['user_jabatan'] : 'Staff';
 $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'U';
 
-// Mendeteksi apakah user adalah admin
-$is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin');
+// Mendeteksi role user
+$is_superadmin = Auth::isSuperadmin();
 ?>
 
 <style>
@@ -71,7 +71,7 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             </li>
             <?php
             $menu_dok = [];
-            if (Auth::isAdmin()) {
+            if (Auth::isFullDataAccess()) {
                 $menu_dok = MasterDokumen::allActive();
             } else {
                 $kode_tunggal = Auth::aksesDokumenTunggal();
@@ -89,17 +89,19 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 </a>
             </li>
             <?php endforeach; ?>
+            <?php if (Auth::isAdmin()): ?>
             <li>
                 <a href="import_arsip.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : ''; ?>">
                     <?= icon('import') ?> Import Arsip Excel
                 </a>
             </li>
+            <?php endif; ?>
             <li>
                 <a href="laporan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'laporan.php') ? 'active' : ''; ?>">
                     <?= icon('report') ?> Laporan Bulanan
                 </a>
             </li>
-            <?php if ($is_admin): ?>
+            <?php if ($is_superadmin): ?>
             <li>
                 <a href="master_data.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'master_data.php') ? 'active' : ''; ?>">
                     <?= icon('database') ?> Master Data
@@ -107,7 +109,7 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             </li>
             <?php endif; ?>
             
-            <?php if ($is_admin): ?>
+            <?php if ($is_superadmin): ?>
             <li style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
                 <a href="dashboard_super.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'dashboard_super.php') ? 'active' : ''; ?>">
                     <?= icon('crown') ?> Panel Super Admin

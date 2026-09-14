@@ -7,7 +7,7 @@ class BackupController
     public function download(): void
     {
         Auth::requireLogin();
-        if (!Auth::isAdmin()) {
+        if (!Auth::isSuperadmin()) {
             die("Akses ditolak!");
         }
 
@@ -52,7 +52,7 @@ class BackupController
 
     public function restoreForm(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         if (isset($_POST['restore'])) {
             Csrf::verify();

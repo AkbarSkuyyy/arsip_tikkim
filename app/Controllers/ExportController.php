@@ -16,7 +16,13 @@ class ExportController
         header("Content-type: application/vnd.ms-excel");
         header("Content-Disposition: attachment; filename=Laporan_SPRI_" . date('Ymd') . ".xls");
 
-        $rows = Permohonan::byPeriode('', $tgl_mulai, $tgl_selesai);
+        $kode_filter = [];
+        if (Auth::isPetugas()) {
+            $kode_tunggal = Auth::aksesDokumenTunggal();
+            if ($kode_tunggal !== '') $kode_filter = [$kode_tunggal];
+        }
+
+        $rows = Permohonan::byPeriode('', $tgl_mulai, $tgl_selesai, $kode_filter);
 
         require __DIR__ . '/../Views/laporan/export_excel.php';
     }

@@ -7,5 +7,5 @@
  * DashboardController (staff) dan DashboardSuperController (super), sehingga
  * sidebar konsisten di SEMUA halaman selama satu mode — tidak berubah-ubah.
  */
-$use_super = Auth::isAdmin() && Session::get('ui_mode', 'staff') === 'super';
+$use_super = Auth::isSuperadmin() && Session::get('ui_mode', 'staff') === 'super';
 include __DIR__ . '/' . ($use_super ? 'sidebar_super.php' : 'sidebar.php');
