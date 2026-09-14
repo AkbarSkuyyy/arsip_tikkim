@@ -45,7 +45,7 @@ class Permohonan
 
     public static function count(array $kodeFilter = []): int
     {
-        [$where, $types, $params] = self::dokWhere($kodeFilter);
+        [$where, $types, $params] = self::dokWhere($kodeFilter, true);
         $r = Database::query("SELECT COUNT(*) as total FROM permohonan" . $where, $types, $params);
         return (int)(mysqli_fetch_assoc($r)['total'] ?? 0);
     }
@@ -85,9 +85,8 @@ class Permohonan
 
     public static function recent(int $limit = 5, array $kodeFilter = []): array
     {
-        [$where, $types, $params] = self::dokWhere($kodeFilter);
-        $whereClause = $where !== '' ? ' WHERE ' . substr($where, 5) : '';
-        $r = Database::query("SELECT * FROM permohonan" . $whereClause . " ORDER BY id DESC LIMIT " . (int)$limit, $types, $params);
+        [$where, $types, $params] = self::dokWhere($kodeFilter, true);
+        $r = Database::query("SELECT * FROM permohonan" . $where . " ORDER BY id DESC LIMIT " . (int)$limit, $types, $params);
         $rows = [];
         if ($r) while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
         return $rows;
@@ -102,12 +101,20 @@ class Permohonan
         return [array_reverse($labels), array_reverse($data)];
     }
 
-    /** Helper: klausa WHERE untuk filter jenis dokumen. Return [where, types, params]. */
-    private static function dokWhere(array $kodeFilter): array
+    /**
+     * Helper: klausa WHERE untuk filter jenis dokumen.
+     * Return [where, types, params]. $where sudah diawali " WHERE " atau
+     * " AND " sesuai kebutuhan (kosong jika tanpa filter):
+     *   - " WHERE dokumen IN (?,...)"  — untuk query tanpa WHERE lain
+     *   - " AND dokumen IN (?,...)"    — untuk query yang sudah punya WHERE
+     * Penentuan otomatis lewat $needsWhere (query tanpa WHERE lain).
+     */
+    private static function dokWhere(array $kodeFilter, bool $needsWhere = false): array
     {
         if (empty($kodeFilter)) return ['', '', []];
         $ph = implode(',', array_fill(0, count($kodeFilter), '?'));
-        return [' AND dokumen IN (' . $ph . ')', str_repeat('s', count($kodeFilter)), $kodeFilter];
+        $prefix = $needsWhere ? ' WHERE ' : ' AND ';
+        return [$prefix . 'dokumen IN (' . $ph . ')', str_repeat('s', count($kodeFilter)), $kodeFilter];
     }
 
     public static function dokumenBreakdown(): array
