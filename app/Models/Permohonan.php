@@ -147,7 +147,7 @@ class Permohonan
      * Peta loker: total arsip per loker aktif (semua periode) untuk grid
      * "Peta Loker" di data_permohonan.php. $kodeFilter = daftar kode dokumen
      * yang boleh diakses (kosong = semua). Setiap loker menyertakan daftar
-     * nomor series (Loker-Rak-Kotak) rak/kotak yang sudah terisi, agar
+     * nomor series (Loker-Rak-Urutan) rak/kotak yang sudah terisi, agar
      * gampang dicari & tercatat rapi di peta.
      */
     public static function lokerMap(array $kodeFilter = []): array
@@ -169,7 +169,7 @@ class Permohonan
         $rows = [];
         while ($row = mysqli_fetch_assoc($r)) $rows[] = $row;
 
-        // Lampirkan daftar seri Rak-Kotak terisi per loker (maks 6 contoh ditampilkan di UI).
+        // Lampirkan daftar seri Rak-Urutan terisi per loker (maks 6 contoh ditampilkan di UI).
         foreach ($rows as &$row) {
             $sql2 = "SELECT DISTINCT rak, kotak FROM permohonan WHERE loker_id = ? AND (rak != '' OR kotak != '')";
             $types2 = 'i';
@@ -185,7 +185,7 @@ class Permohonan
             while ($row2 = mysqli_fetch_assoc($r2)) {
                 $kode = 'L' . $row['nomor'];
                 if ($row2['rak'] !== '') $kode .= '-R' . $row2['rak'];
-                if ($row2['kotak'] !== '') $kode .= '-K' . $row2['kotak'];
+                if ($row2['kotak'] !== '') $kode .= '-U' . $row2['kotak'];
                 $seri[] = $kode;
             }
             $row['seri'] = $seri;
@@ -213,9 +213,9 @@ class Permohonan
     }
 
     /**
-     * Auto-assign lokasi fisik (Loker -> Rak -> Kotak) untuk data BARU saja.
+     * Auto-assign lokasi fisik (Loker -> Rak -> Urutan) untuk data BARU saja.
      * Kapasitas per loker mengikuti unit fisik (lihat kapasitasLokerNomor()).
-     * Urutan pengisian sekuensial: isi Kotak 1..N di Rak A dulu, baru pindah
+     * Urutan pengisian sekuensial: isi Urutan 1..N di Rak A dulu, baru pindah
      * ke Rak B, dst; kalau rak terakhir loker itu penuh baru pindah ke Loker
      * berikutnya (urut nomor loker aktif). Data lama (loker_id=0) TIDAK
      * disentuh/diubah, hanya dipakai untuk menghitung slot mana yang sudah

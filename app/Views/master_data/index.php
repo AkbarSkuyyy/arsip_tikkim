@@ -156,7 +156,7 @@ $f = Session::flashGet();
                     <?php endforeach; ?>
                     </tbody>
                 </table>
-                <div class="note">Lokasi fisik arsip: Loker &rarr; Rak &rarr; Kotak. Dipilih di form tambah/edit permohonan.</div>
+                <div class="note">Lokasi fisik arsip: Loker &rarr; Rak &rarr; Urutan. Dipilih di form tambah/edit permohonan.</div>
             </div>
         </div>
     </main>

@@ -1,7 +1,7 @@
 <?php
 /**
  * Model tabel master_loker (lokasi fisik arsip: 11 loker). Setara pola
- * MasterDokumen / MasterKeterangan. Lokasi arsip = Loker -> Rak -> Kotak.
+ * MasterDokumen / MasterKeterangan. Lokasi arsip = Loker -> Rak -> Urutan.
  */
 class MasterLoker
 {

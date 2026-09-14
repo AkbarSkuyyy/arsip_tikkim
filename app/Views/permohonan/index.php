@@ -192,7 +192,7 @@
 
                 <div class="card-container">
                     <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--imigrasi-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;"><?= icon('archive') ?> Peta Loker</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Kode seri = Loker-Rak-Kotak (mis. L1-RA-K3). Klik loker untuk memfilter tabel.</p>
+                    <p style="font-size: 0.85rem; color: var(--text-blue-grey); margin-bottom: 16px;">Total arsip tersimpan per loker (semua periode). Kode seri = Loker-Rak-Urutan (mis. L1-RA-U3). Klik loker untuk memfilter tabel.</p>
                     <div class="loker-grid">
                         <?php foreach ($loker_map as $lm): ?>
                             <a class="loker-card" href="?cari=<?= urlencode($keyword) ?>&bulan=<?= $bulan_pilihan ?>&tahun=<?= $tahun_pilihan ?>&loker=<?= (int)$lm['id'] ?>&jenis=<?= urlencode($jenis) ?>">
@@ -242,7 +242,7 @@
                                     if ((int)$row['loker_id'] > 0) {
                                         $lokasi = 'Loker ' . htmlspecialchars($row['loker_nomor'] ?? (string)$row['loker_id']);
                                         if ($row['rak'] !== '') $lokasi .= ' &middot; Rak ' . htmlspecialchars($row['rak']);
-                                        if ($row['kotak'] !== '') $lokasi .= ' &middot; Kotak ' . htmlspecialchars($row['kotak']);
+                                        if ($row['kotak'] !== '') $lokasi .= ' &middot; Urutan ' . htmlspecialchars($row['kotak']);
                                     }
                                 ?>
                                     <tr>
@@ -417,7 +417,7 @@
 
                         <div id="lokasi_info" class="form-group-modal full-width <?= ($jenis === '1') ? '' : 'lokasi-info-hidden' ?>" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
                             <?= icon('archive') ?>
-                            <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">Lokasi arsip (Loker · Rak · Kotak) diisi <u>otomatis</u> oleh sistem sesuai slot kosong berikutnya — tidak perlu dipilih manual.</span>
+                            <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">Lokasi arsip (Loker · Rak · Urutan) diisi <u>otomatis</u> oleh sistem sesuai slot kosong berikutnya — tidak perlu dipilih manual.</span>
                         </div>
                         <div class="form-group-modal full-width" style="background: rgba(11, 66, 123, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-blue); margin-top: 10px;">
                             <label style="color: var(--imigrasi-blue);">Tanggal Masuk Arsip</label>
@@ -528,7 +528,7 @@
                             <input type="text" name="rak" id="edit_rak" class="form-control" maxlength="5" placeholder="Contoh: A">
                         </div>
                         <div class="form-group-modal">
-                            <label>Kotak</label>
+                            <label>Urutan</label>
                             <input type="text" name="kotak" id="edit_kotak" class="form-control" maxlength="20" placeholder="Contoh: 1">
                         </div>
                         <div class="form-group-modal full-width" style="background: rgba(245, 166, 35, 0.1); padding: 15px; border-radius: 8px; border: 1px dashed var(--imigrasi-gold); margin-top: 10px;">

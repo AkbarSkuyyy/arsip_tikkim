@@ -61,7 +61,7 @@ class PermohonanController
             Csrf::verify();
             $data = $this->extractFormData($_POST);
 
-            // Lokasi fisik (Loker -> Rak -> Kotak) diisi OTOMATIS hanya untuk SPRI.
+            // Lokasi fisik (Loker -> Rak -> Urutan) diisi OTOMATIS hanya untuk SPRI.
             // Jenis dokumen lain (Izin Tinggal, Lainnya) belum punya loker fisik,
             // jadi dibiarkan tanpa lokasi (loker_id=0).
             $lokasi = ($data['dokumen'] === '1') ? Permohonan::nextLokasiOtomatis() : null;
@@ -79,8 +79,8 @@ class PermohonanController
                 Session::flashSet('error', 'Semua loker arsip sudah penuh! Hubungi admin untuk menambah loker baru.');
             } elseif (Permohonan::create($data)) {
                 if ($data['dokumen'] === '1' && $lokasi !== null) {
-                    catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon'] . " (lokasi otomatis: L{$data['loker_id']}-R{$data['rak']}-K{$data['kotak']})");
-                    Session::flashSet('success', 'Data baru berhasil ditambahkan. Lokasi arsip otomatis: Loker ' . $data['loker_id'] . ' · Rak ' . $data['rak'] . ' · Kotak ' . $data['kotak'] . '.');
+                    catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon'] . " (lokasi otomatis: L{$data['loker_id']}-R{$data['rak']}-U{$data['kotak']})");
+                    Session::flashSet('success', 'Data baru berhasil ditambahkan. Lokasi arsip otomatis: Loker ' . $data['loker_id'] . ' · Rak ' . $data['rak'] . ' · Urutan ' . $data['kotak'] . '.');
                 } else {
                     catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon']);
                     Session::flashSet('success', 'Data baru berhasil ditambahkan.');
