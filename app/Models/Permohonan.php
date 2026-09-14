@@ -18,9 +18,9 @@ class Permohonan
             "INSERT INTO permohonan (nama_pemohon, no_permohonan, tgl_lahir, dokumen, jenis_kelamin, kewarganegaraan, no_paspor_kebangsaan, no_izin_tinggal, masa_berlaku, nama_penjamin, catatan_lain, keterangan, tanggal_input, loker_id, rak, kotak) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             'sssssssssssssiss',
             [
-                $data['nama_pemohon'], $data['no_permohonan'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'],
-                $data['kewarganegaraan'], $data['no_paspor_kebangsaan'], $data['no_izin_tinggal'], $data['masa_berlaku'], $data['nama_penjamin'], $data['catatan_lain'],
-                $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'],
+                $data['nama_pemohon'] ?? '', $data['no_permohonan'] ?? '', $data['tgl_lahir'] ?? null, $data['dokumen'] ?? '', $data['jenis_kelamin'] ?? 'L',
+                $data['kewarganegaraan'] ?? '', $data['no_paspor_kebangsaan'] ?? '', $data['no_izin_tinggal'] ?? '', $data['masa_berlaku'] ?? null, $data['nama_penjamin'] ?? '', $data['catatan_lain'] ?? '',
+                $data['keterangan'] ?? '', $data['tanggal_input'] ?? date('Y-m-d'), (int)($data['loker_id'] ?? 0), $data['rak'] ?? '', $data['kotak'] ?? '',
             ]
         );
     }
@@ -31,9 +31,9 @@ class Permohonan
             "UPDATE permohonan SET nama_pemohon = ?, no_permohonan = ?, tgl_lahir = ?, dokumen = ?, jenis_kelamin = ?, kewarganegaraan = ?, no_paspor_kebangsaan = ?, no_izin_tinggal = ?, masa_berlaku = ?, nama_penjamin = ?, catatan_lain = ?, keterangan = ?, tanggal_input = ?, loker_id = ?, rak = ?, kotak = ? WHERE id = ?",
             'sssssssssssssissi',
             [
-                $data['nama_pemohon'], $data['no_permohonan'], $data['tgl_lahir'], $data['dokumen'], $data['jenis_kelamin'],
-                $data['kewarganegaraan'], $data['no_paspor_kebangsaan'], $data['no_izin_tinggal'], $data['masa_berlaku'], $data['nama_penjamin'], $data['catatan_lain'],
-                $data['keterangan'], $data['tanggal_input'], (int)$data['loker_id'], $data['rak'], $data['kotak'], $id,
+                $data['nama_pemohon'] ?? '', $data['no_permohonan'] ?? '', $data['tgl_lahir'] ?? null, $data['dokumen'] ?? '', $data['jenis_kelamin'] ?? 'L',
+                $data['kewarganegaraan'] ?? '', $data['no_paspor_kebangsaan'] ?? '', $data['no_izin_tinggal'] ?? '', $data['masa_berlaku'] ?? null, $data['nama_penjamin'] ?? '', $data['catatan_lain'] ?? '',
+                $data['keterangan'] ?? '', $data['tanggal_input'] ?? date('Y-m-d'), (int)($data['loker_id'] ?? 0), $data['rak'] ?? '', $data['kotak'] ?? '', $id,
             ]
         );
     }
