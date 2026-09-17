@@ -1,0 +1,9 @@
+# Tolak akses langsung ke seluruh isi folder app/ (Controllers, Models, Core, Views, config.php).
+# Hanya front controller index.php di root yang boleh memuat file-file ini.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

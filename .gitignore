@@ -6,3 +6,10 @@
 .idea/
 Thumbs.db
 .DS_Store
+
+# File SQL dump & backup — jangan commit ke repo
+*.sql
+
+# Konfigurasi database (kredensial lokal/hosting) — jangan commit
+# Salin config.example.php -> config.php lalu isi kredensial asli.
+app/config.php

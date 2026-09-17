@@ -10,12 +10,17 @@ class Database
     public static function conn(): mysqli
     {
         if (self::$conn === null) {
-            $host     = "localhost";
-            $user     = "root"; // Default user XAMPP
-            $password = "";     // Default password XAMPP kosong
-            $db       = "arsip_tikkim";
+            // Baca konfigurasi dari app/config.php (mudah diedit saat deploy).
+            $configFile = __DIR__ . '/../config.php';
+            $config = file_exists($configFile) ? require $configFile : [];
+            $db = $config['db'] ?? [];
 
-            $conn = mysqli_connect($host, $user, $password, $db);
+            $host     = $db['host']     ?? 'localhost';
+            $user     = $db['user']     ?? 'root';
+            $password = $db['password'] ?? '';
+            $dbname   = $db['name']     ?? 'arsip_tikkim';
+
+            $conn = mysqli_connect($host, $user, $password, $dbname);
             if (!$conn) {
                 die("Koneksi gagal: " . mysqli_connect_error());
             }
