@@ -69,6 +69,20 @@
         .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
         .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
         @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Responsive mobile */
+        @media (max-width: 900px) {
+            .content-wrapper { padding: 16px; }
+            .card-container { padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .top-header { padding: 0 16px; height: auto; min-height: 64px; }
+            .page-title { font-size: 1.15rem; }
+            .canvas-container { height: 200px; }
+            .card-header { flex-direction: column; align-items: stretch; gap: 10px; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>

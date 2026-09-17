@@ -98,3 +98,24 @@ h1, h2, h3, h4, .brand-main { font-family: 'Outfit', sans-serif; }
     from { transform: scale(0.92); opacity: 0; }
     to   { transform: scale(1);    opacity: 1; }
 }
+
+/* ===== Responsive mobile global ===== */
+@media (max-width: 900px) {
+    .main-content { padding: 0 !important; }
+    .content-wrapper { padding: 16px !important; }
+    .container { padding: 16px !important; }
+    .card { padding: 16px !important; }
+    .top-header { height: auto !important; min-height: 60px !important; padding: 0 16px !important; }
+    .page-title { font-size: 1.15rem !important; flex-wrap: wrap; }
+    .grid-2 { grid-template-columns: 1fr !important; }
+    .btn-group { flex-direction: column; }
+    .btn { width: 100%; }
+    .toast-container { left: 16px; right: 16px; }
+    .toast { max-width: none; min-width: 0; }
+    .confirm-box { max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+    .content-wrapper { padding: 12px !important; }
+    .page-title { font-size: 1.05rem !important; }
+}

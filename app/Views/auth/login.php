@@ -52,6 +52,13 @@
         .btn-login:hover { background-color: #08305A; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(11,66,123,0.2); }
 
         .login-footer { text-align: center; padding: 20px 30px; background-color: #F8FAFC; border-top: 1px solid var(--border-light); font-size: 0.8rem; color: var(--text-blue-grey); }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .login-header { padding: 28px 20px; }
+            .login-body { padding: 28px 20px; }
+            .brand-main { font-size: 1.3rem; }
+        }
     </style>
 </head>
 <body>
