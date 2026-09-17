@@ -32,11 +32,12 @@ $is_superadmin = Auth::isSuperadmin();
     .sidebar-nav:hover::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.45); }
     .sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.65); }
     .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #94A3B8; text-decoration: none; font-weight: 500; font-size: 1.05rem; transition: all 0.3s ease; }
+    .nav-item .icon svg { width: 20px; height: 20px; }
     .nav-item:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
     .nav-item.active { background-color: #0B427B; color: #fff; border-left: 4px solid #F5A623; }
-    .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
-    .nav-subitem .icon svg { width: 14px; height: 14px; }
+    .nav-subitem { padding-left: 34px; font-size: 0.92rem; padding-top: 10px; padding-bottom: 10px; }
+    .nav-subitem .icon svg { width: 16px; height: 16px; }
     
     .sidebar-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .user-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }

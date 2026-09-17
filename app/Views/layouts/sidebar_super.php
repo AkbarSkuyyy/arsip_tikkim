@@ -31,11 +31,12 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .sidebar-super-nav::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.7); }
     .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
     .nav-section-label { font-size: 0.7rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; padding: 16px 18px 6px; }
-    .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; }
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; font-size: 1.05rem; transition: all 0.3s ease; }
+    .nav-item .icon svg { width: 20px; height: 20px; }
     .nav-item:hover { background-color: rgba(255,255,255,0.06); color: #fff; }
     .nav-item.active { background-color: rgba(245,166,35,0.15); color: #F5A623; border-left: 4px solid #F5A623; }
-    .nav-subitem { padding-left: 34px; font-size: 0.85rem; padding-top: 10px; padding-bottom: 10px; }
-    .nav-subitem .icon svg { width: 14px; height: 14px; }
+    .nav-subitem { padding-left: 34px; font-size: 0.92rem; padding-top: 10px; padding-bottom: 10px; }
+    .nav-subitem .icon svg { width: 16px; height: 16px; }
 
     .sidebar-super-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .user-avatar { width: 36px; height: 36px; background: rgba(245,166,35,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
