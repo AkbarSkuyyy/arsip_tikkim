@@ -35,11 +35,15 @@
         .role-viewer { background: rgba(16, 185, 129, 0.12); color: #059669; }
         .akses-chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(99, 102, 241, 0.12); color: #4F46E5; margin: 1px; }
         .akses-chip.semua { background: rgba(245, 166, 35, 0.15); color: #D48806; }
-        .btn-edit, .btn-delete, .btn-reset { padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: 0.2s; display: inline-block; border: none; cursor: pointer; white-space: nowrap; }
-        .btn-edit { background: #3B82F6; color: #fff; margin-right: 5px; }
-        .btn-reset { background: #6366F1; color: white; margin-right: 5px; }
-        .btn-delete { background: #EF4444; color: #fff; }
-        .btn-edit:hover, .btn-delete:hover, .btn-reset:hover { opacity: 0.8; }
+        .btn-edit, .btn-delete, .btn-reset { padding: 7px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; line-height: 1; }
+        .btn-edit { background: rgba(59, 130, 246, 0.1); color: #2563EB; border-color: rgba(59, 130, 246, 0.25); }
+        .btn-edit:hover { background: #3B82F6; color: #fff; }
+        .btn-reset { background: rgba(99, 102, 241, 0.1); color: #4F46E5; border-color: rgba(99, 102, 241, 0.25); }
+        .btn-reset:hover { background: #6366F1; color: #fff; }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: #DC2626; border-color: rgba(239, 68, 68, 0.25); }
+        .btn-delete:hover { background: #EF4444; color: #fff; }
+        .btn-edit .icon svg, .btn-reset .icon svg, .btn-delete .icon svg { width: 14px; height: 14px; }
+        .aksi-group { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
         .avatar-cell { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--imigrasi-blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
 
@@ -51,8 +55,7 @@
             .card { padding: 16px; }
             .card-header { flex-direction: column; align-items: stretch; }
             .btn-add { justify-content: center; }
-            .aksi-group { display: flex; gap: 6px; flex-wrap: wrap; }
-            .aksi-group .btn-edit, .aksi-group .btn-reset, .aksi-group .btn-delete { margin-right: 0; }
+            .aksi-group { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -111,13 +114,15 @@
                                 </td>
                                 <td>
                                     <div class="aksi-group">
-                                    <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit" title="Edit akun">Edit</a>
-                                    <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset" title="Reset password">Reset Pass</a>
+                                    <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit" title="Edit akun"><?= icon('edit') ?> Edit</a>
+                                    <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset" title="Reset password"><?= icon('key') ?> Reset</a>
+                                    <?php if ((int)$usr['id'] !== Auth::userId()): ?>
                                     <form method="POST" action="hapus_user.php" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
                                         <input type="hidden" name="id" value="<?= (int)$usr['id'] ?>">
                                         <?= Csrf::field() ?>
-                                        <button type="submit" class="btn-delete" title="Hapus akun">Hapus</button>
+                                        <button type="submit" class="btn-delete" title="Hapus akun"><?= icon('trash') ?> Hapus</button>
                                     </form>
+                                    <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
