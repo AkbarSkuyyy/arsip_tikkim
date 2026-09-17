@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard SI RAPI - Seksi TIKKIM</title>
+    <title>Dashboard - SI RAPI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="asset/css/common.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -40,6 +40,7 @@
         .stat-card:nth-child(3)::before { background: var(--imigrasi-gold); }
         .stat-title { font-size: 0.85rem; color: var(--text-blue-grey); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--imigrasi-dark); line-height: 1; }
+        .stat-sub { font-size: 0.8rem; color: var(--text-blue-grey); font-weight: 500; margin-top: 8px; }
         .charts-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 32px; }
         .card-container { background: var(--surface); padding: 28px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-light); }
         .card-title { font-size: 1.1rem; font-weight: 700; color: var(--imigrasi-dark); margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
@@ -56,6 +57,20 @@
         .live-badge { font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 20px; margin-left: 12px; display: inline-flex; align-items: center; gap: 6px; }
         .live-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10B981; animation: rt-pulse 2s infinite; }
         @keyframes rt-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Responsive mobile */
+        @media (max-width: 900px) {
+            .main-content { padding: 0; }
+            .top-header { padding: 0 16px; height: auto; min-height: 64px; }
+            .page-title { font-size: 1.15rem; flex-wrap: wrap; }
+            .content-wrapper { padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+            .stat-card { padding: 20px; }
+            .stat-value { font-size: 2rem; }
+            .charts-grid { grid-template-columns: 1fr; gap: 12px; }
+            .card-container { padding: 16px; }
+            .canvas-container { height: 220px; }
+        }
     </style>
 </head>
 <body>
@@ -70,14 +85,17 @@
                     <div class="stat-card">
                         <div class="stat-title">Total Keseluruhan</div>
                         <div class="stat-value" data-rt="total"><?= (int)$total_data ?></div>
+                        <div class="stat-sub">Arsip SPRI</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Permohonan Baru</div>
                         <div class="stat-value" data-rt="baru"><?= (int)$total_baru ?></div>
+                        <div class="stat-sub">Dokumen Diterbitkan</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Penggantian Paspor</div>
                         <div class="stat-value" data-rt="ganti"><?= (int)$total_ganti ?></div>
+                        <div class="stat-sub">Dokumen Diterbitkan</div>
                     </div>
                 </div>
 
