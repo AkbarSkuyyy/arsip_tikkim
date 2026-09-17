@@ -11,7 +11,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
 
 <style>
     /* CSS Sidebar Super Admin — tema gelap ungu-emas, beda dari sidebar staf */
-    .sidebar-super { width: 280px; background-color: #1E1B3A; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.15); z-index: 10; overflow: hidden; }
+    .sidebar-super { width: 280px; background-color: #1E1B3A; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.15); z-index: 50; overflow: hidden; transition: transform 0.3s ease; }
     .sidebar-super-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
 
     .logo-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
@@ -43,6 +43,17 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .btn-logout:hover { background: #EF4444; color: white; }
     .btn-back-staff { display: flex; align-items: center; gap: 10px; margin: 0 16px 16px; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 10px; color: #D1D5DB; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.2s; flex-shrink: 0; }
     .btn-back-staff:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* Hamburger toggle — mobile */
+    .nav-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 60; width: 44px; height: 44px; border-radius: 10px; background: #1E1B3A; color: #fff; border: 1px solid rgba(245,166,35,0.3); cursor: pointer; align-items: center; justify-content: center; }
+    .nav-toggle svg { width: 22px; height: 22px; }
+    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(10, 37, 64, 0.5); z-index: 45; }
+    @media (max-width: 900px) {
+        .sidebar-super { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
+        .sidebar-super.open { transform: translateX(0); }
+        .sidebar-backdrop.show { display: block; }
+        .nav-toggle { display: flex; }
+    }
 </style>
 
 <aside class="sidebar-super">
@@ -149,3 +160,24 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
         <a href="logout.php" class="btn-logout" title="Keluar" onclick="return confirm('Yakin ingin keluar?');"><?= icon('logout') ?></a>
     </div>
 </aside>
+
+<button class="nav-toggle" id="navToggle" type="button" aria-label="Buka menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<script>
+(function () {
+    const sidebar = document.querySelector('.sidebar-super');
+    const toggle = document.getElementById('navToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    function closeMenu() { sidebar.classList.remove('open'); backdrop.classList.remove('show'); }
+    if (toggle) toggle.addEventListener('click', function () {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+    });
+    if (backdrop) backdrop.addEventListener('click', closeMenu);
+    document.querySelectorAll('.sidebar-super .nav-item').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+    });
+})();
+</script>

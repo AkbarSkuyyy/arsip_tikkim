@@ -74,7 +74,9 @@ class PermohonanController
             $data['rak'] = $lokasi['rak'] ?? '';
             $data['kotak'] = $lokasi['kotak'] ?? '';
 
-            if ($data['tgl_lahir'] === null) {
+            if ($data['nama_pemohon'] === '') {
+                Session::flashSet('error', 'Nama lengkap pemohon wajib diisi!');
+            } elseif ($data['tgl_lahir'] === null) {
                 Session::flashSet('error', 'Tanggal lahir tidak valid!');
             } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                 Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
@@ -96,7 +98,9 @@ class PermohonanController
             $id_edit = (int)$_POST['id_permohonan'];
             if ($id_edit > 0) {
                 $data = $this->extractFormData($_POST);
-                if ($data['tgl_lahir'] === null) {
+                if ($data['nama_pemohon'] === '') {
+                    Session::flashSet('error', 'Nama lengkap pemohon wajib diisi!');
+                } elseif ($data['tgl_lahir'] === null) {
                     Session::flashSet('error', 'Tanggal lahir tidak valid!');
                 } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                     Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
@@ -156,7 +160,7 @@ class PermohonanController
             'dokumen' => trim((string)($post['dokumen'] ?? '')),
             'jenis_kelamin' => (($post['jenis_kelamin'] ?? '') === 'P') ? 'P' : 'L',
             'keterangan' => trim((string)($post['keterangan'] ?? '')),
-            'tanggal_input' => $post['tanggal_input'] ?? date('Y-m-d'),
+            'tanggal_input' => norm_tgl_lahir($post['tanggal_input'] ?? null) ?? date('Y-m-d'),
             'loker_id' => (int)($post['loker_id'] ?? 0),
             'rak' => strtoupper(trim((string)($post['rak'] ?? ''))),
             'kotak' => trim((string)($post['kotak'] ?? '')),

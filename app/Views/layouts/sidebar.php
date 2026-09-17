@@ -14,7 +14,7 @@ $is_superadmin = Auth::isSuperadmin();
 
 <style>
     /* CSS Sidebar */
-    .sidebar { width: 280px; background-color: #0A2540; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.08); z-index: 10; overflow: hidden; }
+    .sidebar { width: 280px; background-color: #0A2540; color: #fff; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.08); z-index: 50; overflow: hidden; transition: transform 0.3s ease; }
     .sidebar-header { padding: 32px 24px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
     
     /* Logo Styling */
@@ -42,6 +42,19 @@ $is_superadmin = Auth::isSuperadmin();
     .user-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #F5A623; font-size: 0.9rem; text-transform: uppercase; }
     .btn-logout { color: #EF4444; background: rgba(239, 68, 68, 0.1); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: 0.2s; }
     .btn-logout:hover { background: #EF4444; color: white; }
+
+    /* Hamburger toggle — hanya tampil di mobile */
+    .nav-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 60; width: 44px; height: 44px; border-radius: 10px; background: #0A2540; color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; align-items: center; justify-content: center; }
+    .nav-toggle svg { width: 22px; height: 22px; }
+    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(10, 37, 64, 0.5); z-index: 45; }
+
+    /* Mobile responsive */
+    @media (max-width: 900px) {
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-backdrop.show { display: block; }
+        .nav-toggle { display: flex; }
+    }
 </style>
 
 <aside class="sidebar">
@@ -145,3 +158,24 @@ $is_superadmin = Auth::isSuperadmin();
     <a href="logout.php" class="btn-logout" title="Keluar" onclick="return confirm('Yakin ingin keluar?');"><?= icon('logout') ?></a>
 </div>
 </aside>
+
+<button class="nav-toggle" id="navToggle" type="button" aria-label="Buka menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<script>
+(function () {
+    const sidebar = document.querySelector('.sidebar');
+    const toggle = document.getElementById('navToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    function closeMenu() { sidebar.classList.remove('open'); backdrop.classList.remove('show'); }
+    if (toggle) toggle.addEventListener('click', function () {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+    });
+    if (backdrop) backdrop.addEventListener('click', closeMenu);
+    document.querySelectorAll('.sidebar .nav-item').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+    });
+})();
+</script>
