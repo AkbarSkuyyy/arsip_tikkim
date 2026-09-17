@@ -421,7 +421,7 @@
                             <input type="text" name="catatan_lain" class="form-control" maxlength="255" placeholder="Jelaskan jenis dokumen/keperluan lainnya">
                         </div>
 
-                        <div id="lokasi_info" class="form-group-modal full-width <?= ($jenis === '1') ? '' : 'lokasi-info-hidden' ?>" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                        <div id="lokasi_info" class="form-group-modal full-width" style="background: rgba(16,185,129,0.06); border: 1px dashed #10B981; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
                             <?= icon('archive') ?>
                             <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">Lokasi arsip (Loker · Rak · Urutan) diisi <u>otomatis</u> oleh sistem sesuai slot kosong berikutnya — tidak perlu dipilih manual.</span>
                         </div>
