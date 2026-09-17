@@ -79,30 +79,10 @@ $is_superadmin = Auth::isSuperadmin();
                 </a>
             </li>
             <li>
-                <a href="data_permohonan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && empty($GLOBALS['current_jenis'])) ? 'active' : ''; ?>">
+                <a href="data_permohonan.php?jenis=1" class="nav-item <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php') ? 'active' : ''; ?>">
                     <?= icon('folder') ?> Data Permohonan
                 </a>
             </li>
-            <?php
-            $menu_dok = [];
-            if (Auth::isFullDataAccess()) {
-                $menu_dok = MasterDokumen::allActive();
-            } else {
-                $kode_tunggal = Auth::aksesDokumenTunggal();
-                if ($kode_tunggal !== '') {
-                    foreach (MasterDokumen::allActive() as $md) {
-                        if ($md['kode'] === $kode_tunggal) { $menu_dok[] = $md; break; }
-                    }
-                }
-            }
-            foreach ($menu_dok as $md):
-            ?>
-            <li>
-                <a href="data_permohonan.php?jenis=<?= urlencode($md['kode']) ?>" class="nav-item nav-subitem <?php echo ($GLOBALS['current_page'] == 'data_permohonan.php' && ($GLOBALS['current_jenis'] ?? '') === $md['kode']) ? 'active' : ''; ?>">
-                    <?= icon('file') ?> <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><?= htmlspecialchars($md['nama']) ?></span>
-                </a>
-            </li>
-            <?php endforeach; ?>
             <?php if (Auth::isSuperadmin()): ?>
             <li>
                 <a href="import_arsip.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : ''; ?>">
