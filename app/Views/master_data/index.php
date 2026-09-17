@@ -1,9 +1,9 @@
 <?php
 /**
- * View: master data jenis dokumen & keterangan. Variabel dari MasterDataController::index():
- * $is_admin, $dokumen_list, $ket_list
+ * View: master data jenis dokumen, keterangan, & loker.
+ * Variabel dari MasterDataController::index(): $is_admin, $dokumen_list,
+ * $ket_list, $loker_list
  */
-$f = Session::flashGet();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -41,9 +41,10 @@ $f = Session::flashGet();
     <?php include __DIR__ . '/../layouts/nav.php'; ?>
     <main class="main-content">
         <header class="top-header">
-            <h1 class="page-title">Master Data</h1>
+            <h1 class="page-title"><?= icon('database') ?> Master Data</h1>
         </header>
         <div class="content-wrapper">
+            <?= flash_toast_script() ?>
             <?php if (!$is_admin): ?>
                 <div class="card" style="border-color: #F0C0C0;">
                     <h2><?= icon('lock') ?> Akses Terbatas</h2>
@@ -160,5 +161,7 @@ $f = Session::flashGet();
             </div>
         </div>
     </main>
+    <script src="asset/js/toast.js"></script>
+    <script src="asset/js/confirm.js"></script>
 </body>
 </html>

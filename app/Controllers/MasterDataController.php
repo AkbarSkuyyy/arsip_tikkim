@@ -8,6 +8,9 @@ class MasterDataController
     {
         Auth::requireSuperadmin();
 
+        // Halaman ini khusus superadmin, jadi selalu admin-level.
+        $is_admin = true;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Csrf::verify();
             $aksi = $_POST['aksi'] ?? '';
