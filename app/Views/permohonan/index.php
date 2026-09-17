@@ -295,7 +295,7 @@
                                                     'rak' => $row['rak'],
                                                     'kotak' => $row['kotak'],
                                                 ]), ENT_QUOTES) ?>')" class="btn-aksi btn-edit"><?= icon('edit') ?> Edit</button>
-                                                <form method="POST" action="data_permohonan.php" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip atas nama: <?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>?');">
+                                                <form method="POST" action="data_permohonan.php" style="display:inline;" data-confirm data-confirm-title="Hapus Arsip" data-confirm-msg="Apakah Anda yakin ingin menghapus arsip atas nama: <?= htmlspecialchars($row['nama_pemohon'], ENT_QUOTES) ?>?">
                                                     <input type="hidden" name="hapus_id" value="<?= $row['id'] ?>">
                                                     <?= Csrf::field() ?>
                                                     <button type="submit" class="btn-aksi btn-hapus"><?= icon('trash') ?> Hapus</button>
@@ -516,6 +516,7 @@
 
     <?= flash_toast_script() ?>
     <script src="asset/js/toast.js"></script>
+    <script src="asset/js/confirm.js"></script>
     <script src="asset/js/realtime.js"></script>
     <script>
         const mTambah = document.getElementById('modalTambah');

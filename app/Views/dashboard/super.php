@@ -193,7 +193,7 @@
                                 <td>
                                     <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit">Edit</a>
                                     <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset">Reset Pass</a>
-                                    <form method="POST" action="hapus_user.php" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
+                                    <form method="POST" action="hapus_user.php" style="display:inline;" data-confirm data-confirm-title="Hapus Akun" data-confirm-msg="Yakin ingin menghapus akun ini?">
                                         <input type="hidden" name="id" value="<?= (int)$usr['id'] ?>">
                                         <?= Csrf::field() ?>
                                         <button type="submit" class="btn-delete">Hapus</button>

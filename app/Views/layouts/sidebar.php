@@ -155,7 +155,7 @@ $is_superadmin = Auth::isSuperadmin();
             <div style="font-size: 0.75rem; color: #94A3B8;"><?php echo htmlspecialchars($user_jabatan); ?></div>
         </div>
     </div>
-    <a href="logout.php" class="btn-logout" title="Keluar" onclick="return confirm('Yakin ingin keluar?');"><?= icon('logout') ?></a>
+    <a href="logout.php" class="btn-logout" title="Keluar" data-confirm-link data-confirm-title="Keluar" data-confirm-msg="Yakin ingin keluar dari aplikasi?" data-confirm-type="warning" data-confirm-ok="Keluar"><?= icon('logout') ?></a>
 </div>
 </aside>
 
@@ -163,6 +163,7 @@ $is_superadmin = Auth::isSuperadmin();
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<script src="asset/js/confirm.js"></script>
 <script>
 (function () {
     const sidebar = document.querySelector('.sidebar');

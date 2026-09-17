@@ -73,11 +73,11 @@ $f = Session::flashGet();
                                 <td><span class="badge <?= $d['aktif'] ? 'badge-aktif' : 'badge-non' ?>"><?= $d['aktif'] ? 'Aktif' : 'Nonaktif' ?></span></td>
                                 <?php if ($is_admin && $d['aktif']): ?>
                                 <td style="text-align:right;">
-                                    <form method="POST" style="display:inline;">
+                                    <form method="POST" style="display:inline;" data-confirm data-confirm-title="Nonaktifkan" data-confirm-msg="Nonaktifkan jenis dokumen ini?">
                                         <?= Csrf::field() ?>
                                         <input type="hidden" name="aksi" value="dokumen_hapus">
                                         <input type="hidden" name="id" value="<?= (int)$d['id'] ?>">
-                                        <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Nonaktifkan jenis dokumen ini?')">Nonaktifkan</button>
+                                        <button type="submit" class="btn-sm btn-danger">Nonaktifkan</button>
                                     </form>
                                 </td>
                                 <?php endif; ?>
@@ -107,11 +107,11 @@ $f = Session::flashGet();
                                 <td><span class="badge <?= $k['aktif'] ? 'badge-aktif' : 'badge-non' ?>"><?= $k['aktif'] ? 'Aktif' : 'Nonaktif' ?></span></td>
                                 <?php if ($is_admin && $k['aktif']): ?>
                                 <td style="text-align:right;">
-                                    <form method="POST" style="display:inline;">
+                                    <form method="POST" style="display:inline;" data-confirm data-confirm-title="Nonaktifkan" data-confirm-msg="Nonaktifkan keterangan ini?">
                                         <?= Csrf::field() ?>
                                         <input type="hidden" name="aksi" value="keterangan_hapus">
                                         <input type="hidden" name="id" value="<?= (int)$k['id'] ?>">
-                                        <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Nonaktifkan keterangan ini?')">Nonaktifkan</button>
+                                        <button type="submit" class="btn-sm btn-danger">Nonaktifkan</button>
                                     </form>
                                 </td>
                                 <?php endif; ?>
@@ -144,11 +144,11 @@ $f = Session::flashGet();
                             <td><span class="badge <?= $l['aktif'] ? 'badge-aktif' : 'badge-non' ?>"><?= $l['aktif'] ? 'Aktif' : 'Nonaktif' ?></span></td>
                             <?php if ($is_admin && $l['aktif']): ?>
                             <td style="text-align:right;">
-                                <form method="POST" style="display:inline;">
+                                <form method="POST" style="display:inline;" data-confirm data-confirm-title="Nonaktifkan" data-confirm-msg="Nonaktifkan loker ini?">
                                     <?= Csrf::field() ?>
                                     <input type="hidden" name="aksi" value="loker_hapus">
                                     <input type="hidden" name="id" value="<?= (int)$l['id'] ?>">
-                                    <button type="submit" class="btn-sm btn-danger" onclick="return confirm('Nonaktifkan loker ini?')">Nonaktifkan</button>
+                                    <button type="submit" class="btn-sm btn-danger">Nonaktifkan</button>
                                 </form>
                             </td>
                             <?php endif; ?>

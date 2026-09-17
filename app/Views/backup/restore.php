@@ -49,7 +49,7 @@ $f = Session::flashGet();
                     <div><strong>Perhatian:</strong> Restore akan <b>menimpa seluruh data</b> yang ada saat ini dengan isi file backup. Pastikan Anda memilih file <code>.sql</code> yang benar (hasil dari Backup DB).</div>
                 </div>
 
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" data-confirm data-confirm-title="Restore Database" data-confirm-msg="Restore akan MENIMPA seluruh data saat ini dengan isi file backup. Lanjutkan?" data-confirm-type="danger" data-confirm-ok="Pulihkan">
                     <?= Csrf::field() ?>
                     <div class="form-group">
                         <label>Pilih File Backup (.sql)</label>
@@ -57,11 +57,12 @@ $f = Session::flashGet();
                     </div>
                     <div class="btn-group">
                         <a href="dashboard_super.php" class="btn btn-cancel">Batal</a>
-                        <button type="submit" name="restore" class="btn btn-danger" onclick="return confirm('Yakin restore? Data saat ini akan ditimpa!');"><?= icon('upload') ?> Pulihkan Sekarang</button>
+                        <button type="submit" name="restore" class="btn btn-danger"><?= icon('upload') ?> Pulihkan Sekarang</button>
                     </div>
                 </form>
             </div>
         </div>
     </main>
+    <script src="asset/js/confirm.js"></script>
 </body>
 </html>

@@ -51,3 +51,50 @@ h1, h2, h3, h4, .brand-main { font-family: 'Outfit', sans-serif; }
     from { transform: translateX(20px); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
 }
+
+/* ===== Modal Konfirmasi (pengganti confirm()) ===== */
+.confirm-overlay {
+    position: fixed; inset: 0; z-index: 200000;
+    background: rgba(10, 37, 64, 0.55);
+    backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-box {
+    background: var(--surface);
+    width: 100%; max-width: 400px;
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: confirm-in 0.2s ease;
+}
+.confirm-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+}
+.confirm-icon.danger { background: rgba(239,68,68,0.12); color: #DC2626; }
+.confirm-icon.warning { background: rgba(245,166,35,0.15); color: #D48806; }
+.confirm-icon.info { background: rgba(11,66,123,0.1); color: var(--imigrasi-blue); }
+.confirm-icon svg { width: 24px; height: 24px; }
+.confirm-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--imigrasi-dark); margin-bottom: 8px; }
+.confirm-message { font-size: 0.9rem; color: var(--text-blue-grey); line-height: 1.6; margin-bottom: 20px; }
+.confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.confirm-btn {
+    padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+.confirm-btn-cancel { background: var(--bg-main); color: var(--text-blue-grey); border-color: var(--border-light); }
+.confirm-btn-cancel:hover { background: #E2E8F0; color: var(--text-dark); }
+.confirm-btn-ok { background: #DC2626; color: #fff; }
+.confirm-btn-ok:hover { background: #B91C1C; }
+.confirm-btn-ok.warning { background: #D48806; }
+.confirm-btn-ok.warning:hover { background: #B45309; }
+.confirm-btn-ok.primary { background: var(--imigrasi-blue); }
+.confirm-btn-ok.primary:hover { background: #08305A; }
+
+@keyframes confirm-in {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
