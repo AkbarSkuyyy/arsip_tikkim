@@ -111,11 +111,13 @@ $is_superadmin = Auth::isSuperadmin();
             </li>
             <?php endif; ?>
 
+            <?php if ($is_superadmin): ?>
             <li>
                 <a href="pengaturan.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'pengaturan.php') ? 'active' : ''; ?>">
                     <?= icon('settings') ?> Pengaturan
                 </a>
             </li>
+            <?php endif; ?>
         </ul>
     </nav>
 
