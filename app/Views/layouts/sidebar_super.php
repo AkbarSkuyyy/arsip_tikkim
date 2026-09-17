@@ -103,6 +103,11 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
                     <?= icon('report') ?> Laporan Bulanan
                 </a>
             </li>
+            <li>
+                <a href="import_arsip.php" class="nav-item <?= ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : '' ?>">
+                    <?= icon('import') ?> Import Arsip Excel
+                </a>
+            </li>
 
             <li class="nav-section-label">Pengguna & Keamanan</li>
             <li>

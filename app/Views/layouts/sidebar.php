@@ -103,7 +103,7 @@ $is_superadmin = Auth::isSuperadmin();
                 </a>
             </li>
             <?php endforeach; ?>
-            <?php if (Auth::isAdmin()): ?>
+            <?php if (Auth::isSuperadmin()): ?>
             <li>
                 <a href="import_arsip.php" class="nav-item <?php echo ($GLOBALS['current_page'] == 'import_arsip.php') ? 'active' : ''; ?>">
                     <?= icon('import') ?> Import Arsip Excel

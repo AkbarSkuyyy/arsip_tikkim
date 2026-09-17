@@ -6,7 +6,7 @@ class ImportController
 {
     public function index(): void
     {
-        Auth::requireAdmin();
+        Auth::requireSuperadmin();
 
         $pesan = null;
         $pesan_error = null;
