@@ -22,7 +22,7 @@ $is_superadmin = Auth::isSuperadmin();
     .logo-box img { width: 100%; height: 100%; object-fit: contain; }
 
     .brand-title { display: flex; flex-direction: column; }
-    .brand-main { font-size: 1.15rem; font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif; }
+    .brand-main { font-size: 1.6rem; font-weight: 800; color: #ffffff; font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; }
     .brand-sub { font-size: 0.7rem; color: #F5A623; text-transform: none; margin-top: 3px; font-weight: 600; line-height: 1.4; letter-spacing: 0.3px; }
     
     .sidebar-nav { flex: 1; padding: 24px 16px; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(245,166,35,0.25) transparent; }

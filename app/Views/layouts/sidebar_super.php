@@ -18,7 +18,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
     .logo-box img { width: 100%; height: 100%; object-fit: contain; }
 
     .brand-title { display: flex; flex-direction: column; }
-    .brand-main { font-size: 1.15rem; font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif; }
+    .brand-main { font-size: 1.6rem; font-weight: 800; color: #ffffff; font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; }
     .brand-sub { font-size: 0.7rem; color: #F5A623; text-transform: none; margin-top: 3px; font-weight: 600; line-height: 1.4; letter-spacing: 0.3px; }
 
     .super-mode-badge { margin: 16px 24px 0; padding: 8px 14px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: #F5A623; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
