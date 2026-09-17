@@ -161,7 +161,7 @@
                     <div class="card-header">
                         <h2 class="card-title">Daftar Pengguna Sistem</h2>
                         <div>
-                            <a href="backup.php" class="btn-backup"><?= icon('database') ?> Backup DB</a>
+                            <a href="backup.php" class="btn-backup" data-confirm-link data-confirm-title="Backup Database" data-confirm-msg="Unduh salinan backup database sekarang?" data-confirm-type="info" data-confirm-ok="Unduh Backup"><?= icon('database') ?> Backup DB</a>
                             <a href="backup_restore.php" class="btn-restore"><?= icon('upload') ?> Restore DB</a>
                             <a href="register.php" class="btn-add"><?= icon('users') ?> Tambah Akun</a>
                         </div>

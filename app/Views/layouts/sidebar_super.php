@@ -122,7 +122,7 @@ $inisial = !empty($user_nama) ? strtoupper(substr($user_nama, 0, 1)) : 'A';
 
             <li class="nav-section-label">Sistem</li>
             <li>
-                <a href="backup.php" class="nav-item <?= ($GLOBALS['current_page'] == 'backup.php') ? 'active' : '' ?>">
+                <a href="backup.php" class="nav-item <?= ($GLOBALS['current_page'] == 'backup.php') ? 'active' : '' ?>" data-confirm-link data-confirm-title="Backup Database" data-confirm-msg="Unduh salinan backup database sekarang?" data-confirm-type="info" data-confirm-ok="Unduh Backup">
                     <?= icon('database') ?> Backup Database
                 </a>
             </li>
