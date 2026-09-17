@@ -23,7 +23,7 @@ $is_superadmin = Auth::isSuperadmin();
 
     .brand-title { display: flex; flex-direction: column; }
     .brand-main { font-size: 1.15rem; font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif; }
-    .brand-sub { font-size: 0.75rem; color: #94A3B8; text-transform: uppercase; margin-top: 3px; font-weight: 600; }
+    .brand-sub { font-size: 0.7rem; color: #F5A623; text-transform: none; margin-top: 3px; font-weight: 600; line-height: 1.4; letter-spacing: 0.3px; }
     
     .sidebar-nav { flex: 1; padding: 24px 16px; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(245,166,35,0.25) transparent; }
     .sidebar-nav::-webkit-scrollbar { width: 6px; }
@@ -66,7 +66,8 @@ $is_superadmin = Auth::isSuperadmin();
         </div>
         <div class="brand-title">
             <span class="brand-main">SI RAPI</span>
-            <span class="brand-sub">Imigrasi Kelas II TPI Kotawaringin Timur</span>
+            <span class="brand-sub">Sistem Aplikasi Rekam Arsip<br>Permohonan Imigrasi</span>
+            <span class="brand-sub" style="color: #64748B; text-transform: none; margin-top: 4px; letter-spacing: 0; font-weight: 500;">Imigrasi Kelas II TPI Kotawaringin Timur</span>
         </div>
     </div>
     
