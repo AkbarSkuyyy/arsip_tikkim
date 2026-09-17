@@ -68,10 +68,8 @@ class PermohonanController
             Csrf::verify();
             $data = $this->extractFormData($_POST);
 
-            // Lokasi fisik (Loker -> Rak -> Urutan) diisi OTOMATIS hanya untuk SPRI.
-            // Jenis dokumen lain (Izin Tinggal, Lainnya) belum punya loker fisik,
-            // jadi dibiarkan tanpa lokasi (loker_id=0).
-            $lokasi = ($data['dokumen'] === '1') ? Permohonan::nextLokasiOtomatis() : null;
+            // Lokasi fisik (Loker -> Rak -> Urutan) diisi OTOMATIS oleh sistem.
+            $lokasi = Permohonan::nextLokasiOtomatis();
             $data['loker_id'] = $lokasi['loker_id'] ?? 0;
             $data['rak'] = $lokasi['rak'] ?? '';
             $data['kotak'] = $lokasi['kotak'] ?? '';
@@ -80,18 +78,11 @@ class PermohonanController
                 Session::flashSet('error', 'Tanggal lahir tidak valid!');
             } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                 Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
-            } elseif ($data['dokumen'] === '13' && $data['masa_berlaku'] === null) {
-                Session::flashSet('error', 'Masa berlaku izin tinggal wajib diisi untuk jenis dokumen Izin Tinggal!');
-            } elseif ($data['dokumen'] === '1' && $lokasi === null) {
+            } elseif ($lokasi === null) {
                 Session::flashSet('error', 'Semua loker arsip sudah penuh! Hubungi admin untuk menambah loker baru.');
             } elseif (Permohonan::create($data)) {
-                if ($data['dokumen'] === '1' && $lokasi !== null) {
-                    catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon'] . " (lokasi otomatis: L{$data['loker_id']}-R{$data['rak']}-U{$data['kotak']})");
-                    Session::flashSet('success', 'Data baru berhasil ditambahkan. Lokasi arsip otomatis: Loker ' . $data['loker_id'] . ' · Rak ' . $data['rak'] . ' · Urutan ' . $data['kotak'] . '.');
-                } else {
-                    catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon']);
-                    Session::flashSet('success', 'Data baru berhasil ditambahkan.');
-                }
+                catatLog(Auth::userNama(), "Menambahkan permohonan baru atas nama: " . $data['nama_pemohon'] . " (lokasi otomatis: L{$data['loker_id']}-R{$data['rak']}-U{$data['kotak']})");
+                Session::flashSet('success', 'Data baru berhasil ditambahkan. Lokasi arsip otomatis: Loker ' . $data['loker_id'] . ' · Rak ' . $data['rak'] . ' · Urutan ' . $data['kotak'] . '.');
             } else {
                 Session::flashSet('error', 'Gagal menambahkan data!');
             }
@@ -109,8 +100,6 @@ class PermohonanController
                     Session::flashSet('error', 'Tanggal lahir tidak valid!');
                 } elseif (!Auth::canAksesDokumen($data['dokumen'])) {
                     Session::flashSet('error', 'Anda tidak memiliki akses untuk jenis dokumen tersebut!');
-                } elseif ($data['dokumen'] === '13' && $data['masa_berlaku'] === null) {
-                    Session::flashSet('error', 'Masa berlaku izin tinggal wajib diisi untuk jenis dokumen Izin Tinggal!');
                 } elseif (Permohonan::update($id_edit, $data)) {
                     catatLog(Auth::userNama(), "Mengubah data permohonan: " . $data['nama_pemohon']);
                     Session::flashSet('success', 'Data permohonan telah diperbarui.');
@@ -166,12 +155,6 @@ class PermohonanController
             'tgl_lahir' => norm_tgl_lahir($post['tgl_lahir'] ?? null),
             'dokumen' => trim((string)($post['dokumen'] ?? '')),
             'jenis_kelamin' => (($post['jenis_kelamin'] ?? '') === 'P') ? 'P' : 'L',
-            'kewarganegaraan' => trim((string)($post['kewarganegaraan'] ?? '')),
-            'no_paspor_kebangsaan' => trim((string)($post['no_paspor_kebangsaan'] ?? '')),
-            'no_izin_tinggal' => trim((string)($post['no_izin_tinggal'] ?? '')),
-            'masa_berlaku' => norm_tgl_lahir($post['masa_berlaku'] ?? null) ?? null,
-            'nama_penjamin' => trim((string)($post['nama_penjamin'] ?? '')),
-            'catatan_lain' => trim((string)($post['catatan_lain'] ?? '')),
             'keterangan' => trim((string)($post['keterangan'] ?? '')),
             'tanggal_input' => $post['tanggal_input'] ?? date('Y-m-d'),
             'loker_id' => (int)($post['loker_id'] ?? 0),
