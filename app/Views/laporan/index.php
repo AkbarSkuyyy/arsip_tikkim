@@ -92,7 +92,7 @@
                         <input type="date" name="tgl_selesai" id="tgl_selesai" class="form-control" value="<?= htmlspecialchars($tgl_selesai) ?>" required>
                     </div>
                     <button type="submit" class="btn btn-primary"><?= icon('search') ?> Terapkan</button>
-                    <div style="width: 1px; height: 38px; background: var(--border-light); margin: 0 8px;"></div>
+                    <div class="filter-divider" aria-hidden="true" style="width: 1px; height: 38px; background: var(--border-light); margin: 0 8px;"></div>
                     <button type="button" class="btn btn-pdf" onclick="window.print()"><?= icon('printer') ?> Cetak PDF</button>
                     <a href="export_excel.php?cari=<?= urlencode($cari) ?>&tgl_mulai=<?= $tgl_mulai ?>&tgl_selesai=<?= $tgl_selesai ?>" class="btn btn-excel" style="background-color: var(--excel-green);">
                         <span><?= icon('download') ?></span> Unduh Excel
@@ -118,6 +118,7 @@
                     <div class="rekap-item">Baru: <span><?= $total_baru ?></span></div>
                     <div class="rekap-item">Penggantian Paspor: <span><?= $total_ganti ?></span></div>
                 </div>
+                <div class="table-scroll" role="region" aria-label="Tabel laporan, geser untuk melihat kolom lainnya" tabindex="0">
                 <table id="tabelLaporan">
                     <thead>
                         <tr>
@@ -146,6 +147,7 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </main>

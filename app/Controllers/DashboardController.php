@@ -11,11 +11,7 @@ class DashboardController
 
         // Scope data: petugas hanya lihat jenis dokumennya sendiri;
         // admin, superadmin, dan viewer melihat semua.
-        $kode_filter = [];
-        if (Auth::isPetugas()) {
-            $kode_tunggal = Auth::aksesDokumenTunggal();
-            if ($kode_tunggal !== '') $kode_filter = [$kode_tunggal];
-        }
+        $kode_filter = archive_scope();
 
         $total_data = Permohonan::count($kode_filter);
         $total_baru = Permohonan::countByKeteranganLike('Baru', $kode_filter);

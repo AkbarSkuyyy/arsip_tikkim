@@ -13,12 +13,7 @@ class RealtimeController
     {
         Auth::requireLogin();
 
-        $is_full = Auth::isFullDataAccess();
-        $kode_filter = [];
-        if (!$is_full) {
-            $kode_tunggal = Auth::aksesDokumenTunggal();
-            $kode_filter = $kode_tunggal !== '' ? [$kode_tunggal] : ['__none__'];
-        }
+        $kode_filter = archive_scope();
 
         // Modul jenis dokumen tertentu (?jenis=) — wajib punya akses.
         $jenis = trim((string)($_GET['jenis'] ?? ''));

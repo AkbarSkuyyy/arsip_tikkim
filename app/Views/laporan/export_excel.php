@@ -5,9 +5,9 @@
  */
 ?>
 <table style="width:100%; border-collapse: collapse;">
-    <tr><td colspan="7" style="text-align:center; font-size:16px; font-weight:bold;"><?= strtoupper($instansi['kementerian']) ?></td></tr>
-    <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold;"><?= strtoupper($instansi['instansi']) ?></td></tr>
-    <tr><td colspan="7" style="text-align:center; font-size:12px;"><?= $instansi['seksi'] ?></td></tr>
+    <tr><td colspan="7" style="text-align:center; font-size:16px; font-weight:bold;"><?= htmlspecialchars(strtoupper($instansi['kementerian']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td></tr>
+    <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold;"><?= htmlspecialchars(strtoupper($instansi['instansi']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td></tr>
+    <tr><td colspan="7" style="text-align:center; font-size:12px;"><?= htmlspecialchars($instansi['seksi'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td></tr>
     <tr><td colspan="7">&nbsp;</td></tr>
     <tr><td colspan="7" style="text-align:center; font-size:14px; font-weight:bold; text-decoration:underline;">LAPORAN REKAPITULASI DATA PERMOHONAN SPRI</td></tr>
     <tr><td colspan="7" style="text-align:center;">Periode: <?= date('d-m-Y', strtotime($tgl_mulai)) . " s/d " . date('d-m-Y', strtotime($tgl_selesai)) ?></td></tr>
@@ -47,9 +47,9 @@
         <td colspan="5"></td>
         <td colspan="2" style="text-align:center;">
             Sampit, <?= date('d-m-Y') ?><br>
-            <?= $instansi['pejabat_jabatan'] ?><br><br><br><br>
-            <u><?= $instansi['pejabat_nama'] ?></u><br>
-            NIP. <?= $instansi['pejabat_nip'] ?>
+            <?= htmlspecialchars($instansi['pejabat_jabatan'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?><br><br><br><br>
+            <u><?= htmlspecialchars($instansi['pejabat_nama'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></u><br>
+            NIP. <?= htmlspecialchars($instansi['pejabat_nip'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
         </td>
     </tr>
 </table>

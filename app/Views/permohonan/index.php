@@ -361,11 +361,11 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalTambah">
+    <div class="modal-overlay" id="modalTambah" role="dialog" aria-modal="true" aria-label="Tambah Pemohon">
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-title"><?= icon('edit') ?> Tambah Pemohon <?= $jenis_nama !== '' ? htmlspecialchars($jenis_nama) : '' ?></div>
-                <button type="button" class="modal-close" onclick="closeModalTambah()">&times;</button>
+                <button type="button" class="modal-close" aria-label="Tutup dialog" onclick="closeModalTambah()">&times;</button>
             </div>
             <form action="" method="POST">
                 <?= Csrf::field() ?>
@@ -433,11 +433,11 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalEdit">
+    <div class="modal-overlay" id="modalEdit" role="dialog" aria-modal="true" aria-label="Edit Data Pemohon">
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-title"><?= icon('edit') ?> Edit Data Pemohon</div>
-                <button type="button" class="modal-close" onclick="closeModalEdit()">&times;</button>
+                <button type="button" class="modal-close" aria-label="Tutup dialog" onclick="closeModalEdit()">&times;</button>
             </div>
             <form action="" method="POST">
                 <?= Csrf::field() ?>
@@ -525,8 +525,31 @@
     <script>
         const mTambah = document.getElementById('modalTambah');
         const mEdit = document.getElementById('modalEdit');
-        function openModalTambah() { mTambah.classList.add('active'); }
-        function closeModalTambah() { mTambah.classList.remove('active'); }
+        let modalOpener = null;
+        function showModal(modal) {
+            modalOpener = document.activeElement;
+            modal.classList.add('active');
+            document.querySelector('.main-wrapper').inert = true;
+            modal.querySelector('.modal-close').focus();
+        }
+        function hideModal(modal) {
+            modal.classList.remove('active');
+            document.querySelector('.main-wrapper').inert = false;
+            modalOpener?.focus();
+        }
+        document.addEventListener('keydown', function (event) {
+            const modal = document.querySelector('.modal-overlay.active');
+            if (!modal) return;
+            if (event.key === 'Escape') { event.preventDefault(); hideModal(modal); }
+            if (event.key === 'Tab') {
+                const items = [...modal.querySelectorAll('button, input:not([type="hidden"]), select, textarea, a[href]')].filter(el => !el.disabled && el.getClientRects().length);
+                const first = items[0], last = items[items.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+        });
+        function openModalTambah() { showModal(mTambah); }
+        function closeModalTambah() { hideModal(mTambah); }
         function openModalEdit(dataJson) {
             const d = JSON.parse(dataJson);
             document.getElementById('edit_id').value = d.id;
@@ -540,9 +563,9 @@
             document.getElementById('edit_loker').value = d.loker_id;
             document.getElementById('edit_rak').value = d.rak;
             document.getElementById('edit_kotak').value = d.kotak;
-            mEdit.classList.add('active');
+            showModal(mEdit);
         }
-        function closeModalEdit() { mEdit.classList.remove('active'); }
+        function closeModalEdit() { hideModal(mEdit); }
         window.onclick = function(event) {
             if (event.target == mTambah) closeModalTambah();
             if (event.target == mEdit) closeModalEdit();

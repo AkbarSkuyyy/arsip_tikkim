@@ -58,7 +58,7 @@ $is_superadmin = Auth::isSuperadmin();
     }
 </style>
 
-<aside class="sidebar">
+<aside class="sidebar" id="appSidebar" aria-label="Menu utama">
     <div class="sidebar-header">
         <div class="logo-wrapper">
             <div class="logo-box">
@@ -143,24 +143,9 @@ $is_superadmin = Auth::isSuperadmin();
 </div>
 </aside>
 
-<button class="nav-toggle" id="navToggle" type="button" aria-label="Buka menu">
+<button class="nav-toggle" id="navToggle" type="button" aria-label="Buka menu" aria-controls="appSidebar" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 <script src="asset/js/confirm.js"></script>
-<script>
-(function () {
-    const sidebar = document.querySelector('.sidebar');
-    const toggle = document.getElementById('navToggle');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    function closeMenu() { sidebar.classList.remove('open'); backdrop.classList.remove('show'); }
-    if (toggle) toggle.addEventListener('click', function () {
-        sidebar.classList.toggle('open');
-        backdrop.classList.toggle('show');
-    });
-    if (backdrop) backdrop.addEventListener('click', closeMenu);
-    document.querySelectorAll('.sidebar .nav-item').forEach(function (a) {
-        a.addEventListener('click', closeMenu);
-    });
-})();
-</script>
+<?php include __DIR__ . '/drawer_script.php'; ?>

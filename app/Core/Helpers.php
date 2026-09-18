@@ -5,17 +5,122 @@
  * dengan pemanggilan langsung di semua Views (icon(), norm_tgl_lahir(), dst).
  */
 
-function norm_tgl_lahir(?string $value): ?string
+function norm_tgl_lahir(mixed $value): ?string
 {
-    $value = trim((string)$value);
-    if ($value === '' || $value === '0000-00-00') return null;
-    $parts = explode('-', $value);
-    if (count($parts) !== 3) return null;
-    [$y, $m, $d] = $parts;
+    if (!is_string($value) || !preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/', $value)) return null;
+    [$y, $m, $d] = explode('-', $value);
     $y = (int)$y; $m = (int)$m; $d = (int)$d;
     if ($y < 1900 || $y > ((int)date('Y') + 1)) return null;
     if (!checkdate($m, $d, $y)) return null;
     return sprintf('%04d-%02d-%02d', $y, $m, $d);
+}
+
+/** HTTP text fields are strings, never arrays, booleans or coerced numbers. */
+function archive_text(mixed $value, string $field, int $max, bool $required = false): string
+{
+    if (!is_string($value)) throw new InvalidArgumentException("$field harus berupa teks.");
+    $value = trim($value);
+    if (($required && $value === '') || strlen($value) > $max || preg_match('/[\x00-\x1F\x7F]/', $value)) {
+        throw new InvalidArgumentException("$field kosong, terlalu panjang, atau mengandung karakter tidak valid.");
+    }
+    return $value;
+}
+
+function archive_data(array $input): array
+{
+    $data = [];
+    foreach (['nama_pemohon'=>255, 'no_permohonan'=>50, 'dokumen'=>50, 'jenis_kelamin'=>1, 'keterangan'=>100] as $key=>$max) {
+        $data[$key] = archive_text($input[$key] ?? '', $key, $max, $key !== 'no_permohonan');
+    }
+    foreach (['tgl_lahir', 'tanggal_input'] as $key) {
+        $data[$key] = norm_tgl_lahir($input[$key] ?? null);
+        if ($data[$key] === null) throw new InvalidArgumentException("$key tidak valid (YYYY-MM-DD).");
+    }
+    if ($data['tgl_lahir'] > date('Y-m-d')) throw new InvalidArgumentException('Tanggal lahir tidak boleh di masa depan.');
+    if (!in_array($data['jenis_kelamin'], ['L','P'], true)) throw new InvalidArgumentException('Jenis kelamin harus L atau P.');
+    $codes = array_map(fn($row) => (string)$row['kode'], MasterDokumen::allActive());
+    if (!in_array($data['dokumen'], $codes, true)) throw new InvalidArgumentException('Jenis dokumen tidak aktif atau tidak dikenal.');
+    if (!in_array($data['keterangan'], array_column(MasterKeterangan::allActive(), 'nama'), true)) throw new InvalidArgumentException('Keterangan tidak aktif atau tidak dikenal.');
+    return $data;
+}
+
+/** Empty filter means ALL: reserve it exclusively for full-access roles. */
+function archive_scope(): array
+{
+    if (Auth::isFullDataAccess()) return [];
+    $code = Auth::aksesDokumenTunggal();
+    $codes = array_map(fn($row) => (string)$row['kode'], MasterDokumen::allActive());
+    return $code !== '' && $code !== '*' && strpos($code, ',') === false && in_array($code, $codes, true) ? [$code] : ['__none__'];
+}
+
+function archive_report_filters(array $query): array
+{
+    $keyword = archive_text($query['cari'] ?? '', 'Pencarian', 255);
+    $start = norm_tgl_lahir($query['tgl_mulai'] ?? date('Y-m-01'));
+    $end = norm_tgl_lahir($query['tgl_selesai'] ?? date('Y-m-t'));
+    if ($start === null || $end === null || $start > $end) throw new InvalidArgumentException('Rentang tanggal tidak valid.');
+    return [$keyword, $start, $end];
+}
+
+function archive_integer(mixed $value, string $field, int $min, int $max): int
+{
+    if (!is_string($value) || !preg_match('/\A[0-9]{1,10}\z/', $value) || (int)$value < $min || (int)$value > $max) {
+        throw new InvalidArgumentException("$field tidak valid.");
+    }
+    return (int)$value;
+}
+
+/** Keep historical locations only when unchanged; never silently relocate old files. */
+function archive_location(array $input, array $lockers, ?array $old = null): array
+{
+    $location = [
+        'loker_id' => archive_integer($input['loker_id'] ?? '', 'Loker', 0, 2147483647),
+        'rak' => archive_text($input['rak'] ?? '', 'Rak', 5),
+        'kotak' => archive_text($input['kotak'] ?? '', 'Urutan', 20),
+    ];
+    if ($old !== null && $location === ['loker_id'=>(int)$old['loker_id'], 'rak'=>(string)$old['rak'], 'kotak'=>(string)$old['kotak']]) return $location;
+    foreach ($lockers as $locker) {
+        if ((int)$locker['id'] !== $location['loker_id']) continue;
+        $small = (int)$locker['nomor'] >= 9 && (int)$locker['nomor'] <= 11;
+        $slot = archive_integer($location['kotak'], 'Urutan', 1, $small ? 100 : 200);
+        if (!in_array($location['rak'], $small ? ['A','B','C','D'] : ['A','B','C','D','E'], true)) break;
+        $location['kotak'] = (string)$slot;
+        return $location;
+    }
+    throw new InvalidArgumentException('Lokasi harus menggunakan loker aktif dan rak/urutan dalam kapasitas.');
+}
+
+function archive_require_record_access(?array $record): void
+{
+    $scope = archive_scope();
+    if (!$record || ($scope !== [] && !in_array((string)$record['dokumen'], $scope, true))) {
+        throw new InvalidArgumentException('Data tidak ditemukan atau akses jenis dokumen ditolak.');
+    }
+}
+
+/** Validate an uploaded file entry from $_FILES before any fopen. Never trust tmp_name/error blindly. */
+function archive_uploaded_file(mixed $file, string $ext, int $maxBytes = 1048576): string
+{
+    if (!is_array($file) || !array_key_exists('error', $file)) {
+        throw new InvalidArgumentException('Berkas unggahan tidak valid.');
+    }
+    $error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+    if ($error !== UPLOAD_ERR_OK) {
+        throw new InvalidArgumentException('Unggahan gagal (kode ' . (int)$error . ').');
+    }
+    $tmp = $file['tmp_name'] ?? '';
+    $name = $file['name'] ?? '';
+    $size = $file['size'] ?? 0;
+    if (!is_string($tmp) || $tmp === '' || !is_uploaded_file($tmp)) {
+        throw new InvalidArgumentException('Berkas sementara tidak valid.');
+    }
+    if (!is_string($name) || strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== strtolower($ext)) {
+        throw new InvalidArgumentException('Ekstensi berkas harus .' . $ext . '.');
+    }
+    if (!is_numeric($size) || (int)$size <= 0 || (int)$size > $maxBytes) {
+        throw new InvalidArgumentException('Ukuran berkas tidak valid atau melebihi batas.');
+    }
+    return $tmp;
 }
 
 function catatLog($user, $aksi): void

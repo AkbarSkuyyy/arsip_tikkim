@@ -10,19 +10,20 @@ class ExportController
 
         $instansi = Pengaturan::get() ?? ['kementerian' => '', 'instansi' => '', 'seksi' => '', 'pejabat_nama' => '', 'pejabat_jabatan' => '', 'pejabat_nip' => ''];
 
-        $tgl_mulai  = $_GET['tgl_mulai']  ?? date('Y-m-01');
-        $tgl_selesai = $_GET['tgl_selesai'] ?? date('Y-m-d');
+        try {
+            [$cari, $tgl_mulai, $tgl_selesai] = archive_report_filters($_GET);
+        } catch (InvalidArgumentException $e) {
+            http_response_code(422);
+            echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+            return;
+        }
 
         header("Content-type: application/vnd.ms-excel");
         header("Content-Disposition: attachment; filename=Laporan_SPRI_" . date('Ymd') . ".xls");
 
-        $kode_filter = [];
-        if (Auth::isPetugas()) {
-            $kode_tunggal = Auth::aksesDokumenTunggal();
-            if ($kode_tunggal !== '') $kode_filter = [$kode_tunggal];
-        }
+        $kode_filter = archive_scope();
 
-        $rows = Permohonan::byPeriode('', $tgl_mulai, $tgl_selesai, $kode_filter);
+        $rows = Permohonan::byPeriode($cari, $tgl_mulai, $tgl_selesai, $kode_filter);
 
         require __DIR__ . '/../Views/laporan/export_excel.php';
     }

@@ -97,6 +97,7 @@
             </div>
 
             <div class="card-container">
+                <div class="table-scroll" role="region" aria-label="Tabel audit trail, geser untuk melihat kolom lainnya" tabindex="0">
                 <table>
                     <thead>
                         <tr>
@@ -121,6 +122,7 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
 
                 <?php if ($total_halaman > 1): ?>
                 <div class="pagination">

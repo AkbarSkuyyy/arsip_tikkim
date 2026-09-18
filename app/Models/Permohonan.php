@@ -5,10 +5,46 @@
  */
 class Permohonan
 {
-    public static function find(int $id): ?array
+    /**
+     * Serialize application archive writers (including slot allocation) and require
+     * InnoDB before promising rollback. Advisory lock also covers empty tables.
+     * External SQL writers must follow the same protocol; this is not a DB constraint.
+     */
+    public static function withArchiveTransaction(callable $operation): mixed
     {
-        $r = Database::query("SELECT * FROM permohonan WHERE id = ?", 'i', [$id]);
-        $row = $r ? mysqli_fetch_assoc($r) : null;
+        $conn = Database::conn();
+        $lock = $conn->query("SELECT GET_LOCK('si_rapi_archive_write', 5) AS locked");
+        if (!$lock || (int)($lock->fetch_assoc()['locked'] ?? 0) !== 1) throw new RuntimeException('Archive lock unavailable.');
+        $started = false;
+        try {
+            $engine = $conn->query("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'permohonan'");
+            if (!$engine || strtoupper((string)($engine->fetch_assoc()['ENGINE'] ?? '')) !== 'INNODB') throw new RuntimeException('Archive storage must use InnoDB.');
+            if (!$conn->begin_transaction()) throw new RuntimeException('Cannot start archive transaction.');
+            $started = true;
+            $result = $operation();
+            if (!$conn->commit()) throw new RuntimeException('Archive commit failed.');
+            $started = false;
+            return $result;
+        } catch (Throwable $e) {
+            if ($started && !$conn->rollback()) throw new RuntimeException('Archive rollback failed; inspect database before retry.', 0, $e);
+            throw $e;
+        } finally {
+            // Do not mask a commit outcome with a lock-cleanup error.
+            try { $conn->query("SELECT RELEASE_LOCK('si_rapi_archive_write')"); } catch (Throwable $e) { error_log('Archive lock release failed.'); }
+        }
+    }
+
+    public static function locationOccupied(array $location, int $excludeId): bool
+    {
+        $r = Database::query("SELECT id FROM permohonan WHERE loker_id = ? AND UPPER(rak) = ? AND CAST(kotak AS UNSIGNED) = ? AND id <> ? LIMIT 1", 'isii', [$location['loker_id'], $location['rak'], (int)$location['kotak'], $excludeId]);
+        if (!$r) throw new RuntimeException('Cannot check archive location.');
+        return (bool)$r->fetch_assoc();
+    }
+
+    public static function find(int $id, bool $forUpdate = false): ?array
+    {
+        $r = Database::query("SELECT * FROM permohonan WHERE id = ?" . ($forUpdate ? ' FOR UPDATE' : ''), 'i', [$id]);
+        $row = $r ? $r->fetch_assoc() : null;
         return $row ?: null;
     }
 

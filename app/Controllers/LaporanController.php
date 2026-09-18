@@ -8,15 +8,15 @@ class LaporanController
     {
         Auth::requireLogin();
 
-        $cari = isset($_GET['cari']) ? trim($_GET['cari']) : '';
-        $tgl_mulai  = $_GET['tgl_mulai']  ?? date('Y-m-01');
-        $tgl_selesai = $_GET['tgl_selesai'] ?? date('Y-m-t');
-
-        $kode_filter = [];
-        if (Auth::isPetugas()) {
-            $kode_tunggal = Auth::aksesDokumenTunggal();
-            if ($kode_tunggal !== '') $kode_filter = [$kode_tunggal];
+        try {
+            [$cari, $tgl_mulai, $tgl_selesai] = archive_report_filters($_GET);
+        } catch (InvalidArgumentException $e) {
+            http_response_code(422);
+            echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+            return;
         }
+
+        $kode_filter = archive_scope();
 
         $data_laporan = Permohonan::byPeriode($cari, $tgl_mulai, $tgl_selesai, $kode_filter);
 

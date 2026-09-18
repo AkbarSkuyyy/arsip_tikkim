@@ -100,12 +100,36 @@ h1, h2, h3, h4, .brand-main { font-family: 'Outfit', sans-serif; }
 }
 
 /* ===== Responsive mobile global ===== */
-@media (max-width: 900px) {
+/* Flex children must shrink so wide tables scroll inside their wrapper. */
+.main-content, .content { min-width: 0; }
+.table-scroll { width: 100%; max-width: 100%; overflow-x: auto; }
+.table-scroll > table { min-width: 680px; }
+.table-scroll:focus-visible, .nav-toggle:focus-visible { outline: 3px solid #F5A623; outline-offset: -3px; }
+body.drawer-open { overflow: hidden; }
+
+@media screen and (max-width: 900px) {
     .main-content { padding: 0 !important; }
     .content-wrapper { padding: 16px !important; }
     .container { padding: 16px !important; }
     .card { padding: 16px !important; }
-    .top-header { height: auto !important; min-height: 60px !important; padding: 0 16px !important; }
+    .top-header { height: auto !important; min-height: 76px !important; padding: 12px 16px 12px 76px !important; gap: 12px; flex-wrap: wrap; }
+    .top-header .page-title { min-width: 0; overflow-wrap: anywhere; }
+    .sidebar, .sidebar-super { max-width: calc(100vw - 24px); height: 100dvh !important; }
+    .sidebar-header, .sidebar-super-header { padding-top: 76px !important; }
+    .content { padding: 0 !important; }
+    .report-document { padding: 20px 16px !important; }
+    .filter-divider { display: none; }
+    .report-heading h3 { overflow-wrap: anywhere; }
+    .rekap-box, .quick-filters, .info-bar, .pagination, .pagination-nav { flex-wrap: wrap; gap: 12px !important; }
+    .filter-form .form-group { min-width: 0 !important; width: 100%; }
+    .filter-form input, .filter-form select { min-width: 0 !important; max-width: 100%; width: 100%; }
+    .panel-filter, .filter-form { padding: 16px !important; }
+    .modal-overlay .modal-container { width: calc(100% - 24px); max-height: calc(100dvh - 24px); }
+    .modal-container .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .modal-container .form-group-modal, .modal-container .form-control { min-width: 0; }
+    .modal-container .modal-footer { flex-wrap: wrap; gap: 8px; padding: 12px; }
+    .modal-footer button { min-height: 44px; flex: 1 1 auto; justify-content: center; }
+    .modal-container .modal-close { min-width: 44px; min-height: 44px; flex-shrink: 0; }
     .page-title { font-size: 1.15rem !important; flex-wrap: wrap; }
     .grid-2 { grid-template-columns: 1fr !important; }
     .btn-group { flex-direction: column; }
@@ -115,7 +139,25 @@ h1, h2, h3, h4, .brand-main { font-family: 'Outfit', sans-serif; }
     .confirm-box { max-width: 100%; }
 }
 
-@media (max-width: 480px) {
+@media screen and (max-width: 600px) {
+    .modal-container .form-grid { grid-template-columns: minmax(0, 1fr); }
+    .modal-container .modal-body, .modal-container .modal-header { padding: 12px; }
+}
+
+@media print {
+    .sidebar, .sidebar-super, .nav-toggle, .sidebar-backdrop { display: none !important; }
+    body { display: block !important; height: auto !important; overflow: visible !important; }
+    .main-content, .content { overflow: visible !important; height: auto !important; }
+    .table-scroll { overflow: visible; }
+    .table-scroll > table { min-width: 0; }
+    .table-scroll th, .table-scroll td { overflow-wrap: anywhere; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar, .sidebar-super, .modal-overlay, .modal-container { transition: none !important; }
+}
+
+@media screen and (max-width: 480px) {
     .content-wrapper { padding: 12px !important; }
     .page-title { font-size: 1.05rem !important; }
 }

@@ -111,13 +111,19 @@ class UserController
             if ($role === 'user' && $akses_dokumen === '') {
                 $error = "Pilih satu jenis dokumen untuk akun petugas!";
                 $akses_sekarang = $akses_dokumen;
-            } elseif ($role === 'superadmin' && $this->isLastSuperadmin($id)) {
-                $error = "Tidak bisa menurunkan role superadmin terakhir!";
             } else {
-                Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses_dokumen, $id]);
-                catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
-                header("Location: kelola_akun.php");
-                exit;
+                try {
+                    if (!$this->mutateAccount($id, $role, $akses_dokumen)) {
+                        throw new \RuntimeException('Perubahan akun gagal.');
+                    }
+                    catatLog(Auth::userNama(), "Mengubah role " . $user['username'] . " menjadi " . $role . " (akses: " . $akses_dokumen . ")");
+                    header("Location: kelola_akun.php");
+                    exit;
+                } catch (\DomainException $e) {
+                    $error = $e->getMessage();
+                } catch (\Throwable $e) {
+                    $error = 'Perubahan akun gagal. Silakan coba kembali.';
+                }
             }
         }
 
@@ -170,14 +176,16 @@ class UserController
         if ($id > 0) {
             $user = User::find($id);
             if ($user) {
-                if ((int)$user['id'] === Auth::userId()) {
-                    Session::flashSet('error', 'Anda tidak bisa menghapus akun sendiri!');
-                } elseif ($user['role'] === 'superadmin' && $this->isLastSuperadmin((int)$user['id'])) {
-                    Session::flashSet('error', 'Tidak bisa menghapus superadmin terakhir!');
-                } else {
-                    User::delete($id);
+                try {
+                    if (!$this->mutateAccount($id, null)) {
+                        throw new \RuntimeException('Penghapusan akun gagal.');
+                    }
                     catatLog(Auth::userNama(), "Menghapus akun user: " . $user['username']);
                     Session::flashSet('success', 'Akun telah dihapus.');
+                } catch (\DomainException $e) {
+                    Session::flashSet('error', $e->getMessage());
+                } catch (\Throwable $e) {
+                    Session::flashSet('error', 'Penghapusan akun gagal. Silakan coba kembali.');
                 }
             }
         }
@@ -186,11 +194,46 @@ class UserController
         exit;
     }
 
-    /** Apakah $id adalah superadmin terakhir yang tersisa? */
+    /**
+     * Serialize role updates and deletes on this database, including the count.
+     * A connection-scoped advisory lock works without assuming a table engine.
+     * All role-removal paths must use this same lock; direct SQL is outside it.
+     */
+    private function mutateAccount(int $id, ?string $role, string $akses = '*'): bool
+    {
+        $lock = "SHA2(CONCAT(DATABASE(), ':users-role'), 256)";
+        $r = Database::query("SELECT GET_LOCK($lock, 5) AS acquired");
+        if (!$r || (int)(mysqli_fetch_assoc($r)['acquired'] ?? 0) !== 1) {
+            throw new \RuntimeException('Tidak dapat mengunci perubahan akun.');
+        }
+        try {
+            // Rights may have changed while this request waited for the lock.
+            if (!Auth::check() || !Auth::isSuperadmin()) {
+                throw new \DomainException('Hak pengelolaan akun telah berubah. Silakan login kembali.');
+            }
+            $current = User::find($id);
+            if (!$current) throw new \DomainException('Akun tidak ditemukan.');
+            if ($role === null && $id === Auth::userId()) {
+                throw new \DomainException('Anda tidak bisa menghapus akun sendiri!');
+            }
+            if ($current['role'] === 'superadmin' && $role !== 'superadmin' && $this->isLastSuperadmin($id)) {
+                throw new \DomainException('Tidak bisa menghapus atau menurunkan role superadmin terakhir!');
+            }
+            return $role === null
+                ? User::delete($id)
+                : Database::exec("UPDATE users SET role = ?, akses_dokumen = ? WHERE id = ?", 'ssi', [$role, $akses, $id]);
+        } finally {
+            Database::query("SELECT RELEASE_LOCK($lock) AS released");
+        }
+    }
+
+    /** Called only inside mutateAccount's lock. Query failures are fail-closed. */
     private function isLastSuperadmin(int $id): bool
     {
         $r = Database::query("SELECT COUNT(*) AS t FROM users WHERE role = 'superadmin' AND id != ?", 'i', [$id]);
-        $count = (int)(mysqli_fetch_assoc($r)['t'] ?? 0);
-        return $count === 0;
+        if (!$r) throw new \RuntimeException('Tidak dapat memeriksa jumlah superadmin.');
+        $row = mysqli_fetch_assoc($r);
+        if (!isset($row['t'])) throw new \RuntimeException('Jumlah superadmin tidak tersedia.');
+        return (int)$row['t'] === 0;
     }
 }

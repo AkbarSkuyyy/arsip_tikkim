@@ -5,14 +5,27 @@
  */
 class AuthController
 {
-    /** Ambil IP client (dengan dukungan proxy bila ada). */
+    /** Default: peer langsung. TRUSTED_PROXIES hanya daftar IP exact milik operator. */
     private function clientIp(): string
     {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+        $peer = $_SERVER['REMOTE_ADDR'] ?? '';
+        if (!is_string($peer) || !filter_var($peer, FILTER_VALIDATE_IP)) return '0.0.0.0';
+
+        $trusted = array_filter(array_map('trim', explode(',', getenv('TRUSTED_PROXIES') ?: '')),
+            static fn($ip) => filter_var($ip, FILTER_VALIDATE_IP) !== false);
+        $header = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+        if (!in_array($peer, $trusted, true) || !is_string($header) || $header === '') return $peer;
+
+        $chain = array_map('trim', explode(',', $header));
+        foreach ($chain as $ip) {
+            if (!filter_var($ip, FILTER_VALIDATE_IP)) return $peer;
         }
-        return substr((string)$ip, 0, 45);
+        // Traverse from the trusted peer; never trust a spoofable leftmost entry.
+        $client = $peer;
+        for ($i = count($chain) - 1; $i >= 0 && in_array($client, $trusted, true); $i--) {
+            $client = $chain[$i];
+        }
+        return $client;
     }
 
     /** Bersihkan catatan throttle untuk IP (setelah sukses). */
@@ -48,6 +61,16 @@ class AuthController
         return false;
     }
 
+    /** HTTP credentials must be strings, never arrays/coerced values. */
+    private function loginInput(): ?array
+    {
+        $identifier = $_POST['user_input'] ?? null;
+        $password = $_POST['password'] ?? null;
+        if (!is_string($identifier) || !is_string($password)
+            || trim($identifier) === '' || $password === '') return null;
+        return [trim($identifier), $password];
+    }
+
     public function login(): void
     {
         if (Auth::check()) {
@@ -73,22 +96,13 @@ class AuthController
                 $menit = ceil(($locked - time()) / 60);
                 $error = "Terlalu banyak percobaan login. Coba lagi dalam $menit menit.";
             } else {
-                $user_input = trim($_POST['user_input']);
-                $password = $_POST['password'];
-
-                $row = User::findByLogin($user_input);
+                $credentials = $this->loginInput();
+                [$user_input, $password] = $credentials ?? ['', ''];
+                $row = $credentials === null ? null : User::findByLogin($user_input);
 
                 if ($row && password_verify($password, $row['password'])) {
                     $this->throttleClear($ip);
-                    Session::set('login', true);
-                    Session::set('user_id', $row['id']);
-                    Session::set('user_nama', $row['nama']);
-                    Session::set('user_jabatan', $row['jabatan']);
-                    Session::set('username', $row['username']);
-                    Session::set('user_role', $row['role']);
-                    Session::set('user_akses', $row['akses_dokumen'] ?? '*');
-                    Session::set('user_foto', $row['foto_profile']);
-                    Session::set('last_activity', time());
+                    Auth::establishSession($row);
 
                     catatLog(Session::get('user_nama'), "User berhasil login ke sistem.");
 

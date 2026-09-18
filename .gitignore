@@ -13,3 +13,6 @@ Thumbs.db
 # Konfigurasi database (kredensial lokal/hosting) — jangan commit
 # Salin config.example.php -> config.php lalu isi kredensial asli.
 app/config.php
+
+# Laporan audit QA (memuat rincian kelemahan internal) — jangan commit/deploy
+dogfood-output/

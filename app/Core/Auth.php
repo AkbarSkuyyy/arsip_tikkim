@@ -12,7 +12,58 @@ class Auth
 {
     public static function check(): bool
     {
-        return Session::has('login');
+        if (!Session::has('login')) return false;
+        try {
+            $nonce = Session::get('auth_nonce');
+            $proof = Session::get('auth_proof');
+            $row = User::find(self::userId());
+            // Old sessions have no proof: require fresh authentication, never adopt
+            // the current password for a session that has not verified it.
+            if (!$row || !is_string($nonce) || !is_string($proof)
+                || !in_array($row['role'] ?? '', ['superadmin', 'admin', 'user', 'viewer'], true)
+                || !hash_equals($proof, hash_hmac('sha256', $row['password'], $nonce))) {
+                Session::destroy();
+                return false;
+            }
+            if (Session::get('user_role') !== $row['role']
+                || Session::get('user_akses') !== ($row['akses_dokumen'] ?? '*')) {
+                if (!session_regenerate_id(true)) {
+                    Session::destroy();
+                    return false;
+                }
+            }
+            self::refreshIdentity($row);
+            return true;
+        } catch (\Throwable $e) {
+            // Database unavailable or malformed record must never retain privileges.
+            Session::destroy();
+            return false;
+        }
+    }
+
+    /** Call only after password verification. Password changes invalidate proof. */
+    public static function establishSession(array $row): void
+    {
+        Session::start();
+        if (!session_regenerate_id(true)) {
+            Session::destroy();
+            throw new \RuntimeException('Tidak dapat memperbarui sesi login.');
+        }
+        $nonce = bin2hex(random_bytes(32));
+        Session::set('auth_nonce', $nonce);
+        Session::set('auth_proof', hash_hmac('sha256', $row['password'], $nonce));
+        self::refreshIdentity($row);
+        Session::set('last_activity', time());
+        Session::set('login', true);
+    }
+
+    private static function refreshIdentity(array $row): void
+    {
+        foreach (['user_id' => 'id', 'user_nama' => 'nama', 'user_jabatan' => 'jabatan',
+            'username' => 'username', 'user_role' => 'role', 'user_foto' => 'foto_profile'] as $key => $column) {
+            Session::set($key, $row[$column] ?? '');
+        }
+        Session::set('user_akses', $row['akses_dokumen'] ?? '*');
     }
 
     /** Timeout idle (menit). 0 = nonaktif. */
