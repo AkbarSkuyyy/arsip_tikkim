@@ -50,11 +50,17 @@
         .log-item:last-child { border-bottom: none; margin-bottom: 0; }
         .log-aksi { font-weight: 600; font-size: 0.87rem; color: var(--imigrasi-blue); }
         .log-meta { font-size: 0.78rem; color: var(--text-blue-grey); margin-top: 3px; }
-        .btn-edit, .btn-delete, .btn-reset { padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: 0.2s; display: inline-block; border: none; cursor: pointer; }
-        .btn-edit { background: #3B82F6; color: #fff; margin-right: 5px; }
-        .btn-reset { background: #6366F1; color: white; margin-right: 5px; }
-        .btn-delete { background: #EF4444; color: #fff; }
-        .btn-edit:hover, .btn-delete:hover, .btn-reset:hover { opacity: 0.8; }
+        .btn-edit, .btn-delete, .btn-reset { padding: 7px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; line-height: 1; }
+        .btn-edit { background: rgba(59, 130, 246, 0.1); color: #2563EB; border-color: rgba(59, 130, 246, 0.25); }
+        .btn-edit:hover { background: #3B82F6; color: #fff; }
+        .btn-reset { background: rgba(99, 102, 241, 0.1); color: #4F46E5; border-color: rgba(99, 102, 241, 0.25); }
+        .btn-reset:hover { background: #6366F1; color: #fff; }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: #DC2626; border-color: rgba(239, 68, 68, 0.25); }
+        .btn-delete:hover { background: #EF4444; color: #fff; }
+        .btn-edit .icon svg, .btn-reset .icon svg, .btn-delete .icon svg { width: 14px; height: 14px; }
+        .aksi-group { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
+        .avatar-cell { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--imigrasi-blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
         .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
         .role-superadmin { background: rgba(245,166,35,0.15); color: #B45309; }
         .role-admin { background: rgba(245,166,35,0.12); color: #D48806; }
@@ -173,20 +179,26 @@
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                 <div class="card-container">
                     <div class="card-header">
-                        <h2 class="card-title">Daftar Pengguna Sistem</h2>
-                        <div>
+                        <h2 class="card-title">Daftar Pengguna Sistem (<?= count($users) ?>)</h2>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <a href="backup.php" class="btn-backup" data-confirm-link data-confirm-title="Backup Database" data-confirm-msg="Unduh salinan backup database sekarang?" data-confirm-type="info" data-confirm-ok="Unduh Backup"><?= icon('database') ?> Backup DB</a>
                             <a href="backup_restore.php" class="btn-restore"><?= icon('upload') ?> Restore DB</a>
                             <a href="register.php" class="btn-add"><?= icon('users') ?> Tambah Akun</a>
                         </div>
                     </div>
                     <?php $dok_map = []; foreach ($dokumen_list as $d) $dok_map[$d['kode']] = $d['nama']; ?>
+                    <div class="table-scroll" role="region" aria-label="Daftar pengguna sistem, geser untuk melihat kolom lainnya" tabindex="0">
                     <table>
                         <thead><tr><th>NAMA</th><th>USERNAME</th><th>JABATAN</th><th>ROLE</th><th>AKSES DOKUMEN</th><th>AKSI</th></tr></thead>
                         <tbody>
                             <?php foreach ($users as $usr): ?>
                             <tr>
-                                <td><?= htmlspecialchars($usr['nama']) ?></td>
+                                <td>
+                                    <div class="avatar-cell">
+                                        <div class="avatar"><?= htmlspecialchars(strtoupper(substr((string)$usr['nama'], 0, 1))) ?></div>
+                                        <span style="font-weight:700; color:var(--imigrasi-dark);"><?= htmlspecialchars($usr['nama']) ?></span>
+                                    </div>
+                                </td>
                                 <td><?= htmlspecialchars($usr['username']) ?></td>
                                 <td><?= htmlspecialchars($usr['jabatan']) ?></td>
                                 <td><span class="role-badge role-<?= htmlspecialchars($usr['role']) ?>"><?= htmlspecialchars(UserController::roleLabel($usr['role'])) ?></span></td>
@@ -205,18 +217,23 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit">Edit</a>
-                                    <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset">Reset Pass</a>
-                                    <form method="POST" action="hapus_user.php" style="display:inline;" data-confirm data-confirm-title="Hapus Akun" data-confirm-msg="Yakin ingin menghapus akun ini?">
-                                        <input type="hidden" name="id" value="<?= (int)$usr['id'] ?>">
-                                        <?= Csrf::field() ?>
-                                        <button type="submit" class="btn-delete">Hapus</button>
-                                    </form>
+                                    <div class="aksi-group">
+                                        <a href="edit_user.php?id=<?= (int)$usr['id'] ?>" class="btn-edit" title="Edit akun"><?= icon('edit') ?> Edit</a>
+                                        <a href="reset_password.php?id=<?= (int)$usr['id'] ?>" class="btn-reset" title="Reset password"><?= icon('key') ?> Reset</a>
+                                        <?php if ((int)$usr['id'] !== Auth::userId()): ?>
+                                        <form method="POST" action="hapus_user.php" style="display:inline;" data-confirm data-confirm-title="Hapus Akun" data-confirm-msg="Yakin ingin menghapus akun ini? Tindakan tidak bisa dibatalkan.">
+                                            <input type="hidden" name="id" value="<?= (int)$usr['id'] ?>">
+                                            <?= Csrf::field() ?>
+                                            <button type="submit" class="btn-delete" title="Hapus akun"><?= icon('trash') ?> Hapus</button>
+                                        </form>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 <div class="card-container">
@@ -276,5 +293,6 @@
         });
     </script>
     <script src="asset/js/realtime.js"></script>
+    <script src="asset/js/confirm.js"></script>
 </body>
 </html>
