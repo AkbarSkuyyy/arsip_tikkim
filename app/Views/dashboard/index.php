@@ -60,16 +60,24 @@
 
         /* Responsive mobile */
         @media (max-width: 900px) {
-            .main-content { padding: 0; }
-            .top-header { padding: 0 16px; height: auto; min-height: 64px; }
-            .page-title { font-size: 1.15rem; flex-wrap: wrap; }
+            .main-content { padding: 0; min-width: 0; width: 100%; }
+            .top-header { padding: 12px 16px 12px 76px; height: auto; min-height: 76px; flex-wrap: wrap; }
+            .page-title { font-size: 1.15rem; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
             .content-wrapper { padding: 16px; }
-            .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .stat-card { padding: 20px; }
             .stat-value { font-size: 2rem; }
             .charts-grid { grid-template-columns: 1fr; gap: 12px; }
             .card-container { padding: 16px; }
             .canvas-container { height: 220px; }
+        }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .content-wrapper { padding: 12px; }
+            .page-title { font-size: 1.05rem; }
+            .stat-value { font-size: 1.6rem; }
         }
     </style>
 </head>
@@ -120,6 +128,7 @@
                         Daftar Permohonan Terbaru
                         <a href="data_permohonan.php" class="btn-view-all">Kelola Data &rarr;</a>
                     </div>
+                    <div class="table-scroll" role="region" aria-label="Daftar permohonan terbaru, geser untuk melihat kolom lainnya" tabindex="0">
                     <table style="margin-top: 16px;">
                         <thead>
                             <tr>
@@ -142,6 +151,7 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </main>
